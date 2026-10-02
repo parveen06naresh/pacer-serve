@@ -65,6 +65,54 @@ def conformal_ratio(model, X_cal, y_cal, coverage: float) -> float:
     return float(r[k])
 
 
+class OnlineConformal:
+    """Adaptive conformal inference (Gibbs & Candes, 2021) on the latency ratio y / y_hat.
+
+    Offline conformal bounds assume tomorrow's hardware behaves like profiling day. A
+    noisy neighbour, thermal throttling or a driver update breaks that, and a fixed
+    bound silently stops covering. ACI keeps a sliding window of observed ratios and
+    nudges its miscoverage level after every step:
+
+        alpha_{t+1} = alpha_t + gamma * (alpha - 1[ratio_t > bound_t])
+
+    which guarantees the long-run fraction of steps exceeding the bound converges to
+    alpha for *any* sequence of ratios, adversarial drift included.
+    """
+
+    def __init__(self, alpha: float = 0.1, gamma: float = 0.02, window: int = 256, warmup: int = 32):
+        from collections import deque
+        self.alpha = alpha
+        self.alpha_t = alpha
+        self.gamma = gamma
+        self.buf = deque(maxlen=window)
+        self.warmup = warmup
+        self.n = 0
+        self.misses = 0
+
+    @property
+    def ready(self) -> bool:
+        return len(self.buf) >= self.warmup
+
+    def bound(self) -> float:
+        r = np.fromiter(self.buf, float)
+        if self.alpha_t <= 0:
+            return float(r.max()) * 1.25
+        if self.alpha_t >= 1:
+            return float(r.min())
+        return float(np.quantile(r, 1.0 - self.alpha_t, method="higher"))
+
+    def center(self) -> float:
+        return float(np.median(np.fromiter(self.buf, float)))
+
+    def update(self, ratio: float) -> None:
+        if self.ready:
+            miss = ratio > self.bound()
+            self.alpha_t += self.gamma * (self.alpha - miss)
+            self.n += 1
+            self.misses += miss
+        self.buf.append(ratio)
+
+
 class LatencyModel:
     name = "base"
 

@@ -18,7 +18,11 @@ BLUE, ORANGE, AQUA, YELLOW, MAGENTA, GREEN, VIOLET = "#2a78d6", "#eb6834", "#1ba
 GRAY = "#9a9893"
 
 STYLE = {
-    "pacer": dict(color=BLUE, lw=2.4, marker="o", label="Pacer (ours)"),
+    "pacer-online": dict(color=BLUE, lw=2.6, marker="o", label="Pacer + online conformal (ours)"),
+    "pacer": dict(color=GREEN, lw=1.8, ls="--", marker="o", ms=4, label="Pacer, offline calibration (ours)"),
+    "pacer-slack": dict(color=YELLOW, lw=1.6, ls="--", marker="o", ms=4, label="Pacer + slack banking"),
+    "pacer-edf": dict(color=MAGENTA, lw=1.6, ls="--", marker="o", ms=4, label="Pacer, EDF instead of Moore-Hodgson"),
+    "pacer-fcfs": dict(color=ORANGE, lw=1.6, ls=":", marker="o", ms=4, label="Pacer, FCFS order"),
     "prefill-first": dict(color=ORANGE, lw=2, marker="s", label="Prefill-first (vLLM v0)"),
     "chunked-best": dict(color=AQUA, lw=2, marker="^", label="Chunked, best fixed budget (Sarathi)"),
     "chunked-edf-best": dict(color=VIOLET, lw=2, marker="D", ms=5, label="Chunked + EDF, best fixed budget"),
@@ -26,8 +30,6 @@ STYLE = {
     "chunked-128": dict(color=GRAY, lw=1.2, ls="--", marker=None, label="Chunked-128"),
     "chunked-256": dict(color=GRAY, lw=1.2, ls="-.", marker=None, label="Chunked-256"),
     "chunked-512": dict(color=GRAY, lw=1.2, ls=(0, (1, 3)), marker=None, label="Chunked-512"),
-    "pacer-no-slack": dict(color=YELLOW, lw=1.6, ls="--", marker="o", ms=4, label="Pacer w/o slack"),
-    "pacer-no-edf": dict(color=MAGENTA, lw=1.6, ls="--", marker="o", ms=4, label="Pacer w/o EDF"),
 }
 
 
@@ -169,38 +171,132 @@ def robustness_fig():
     rob = json.load(open(p)).get("robustness")
     if not rob:
         return
-    names = {"pacer": "Pacer (ours, no tuning)"}
+    names = {"pacer-online": "Pacer + online (ours)", "pacer": "Pacer offline (ours)"}
     order = sorted(rob, key=lambda k: rob[k]["worst"])
     scen = list(next(iter(rob.values()))["relative"])
     labels = {"bench_sim": "Poisson, TPOT 100ms", "bench_sim_tpot0.06": "Poisson, TPOT 60ms",
-              "bench_sim_tpot0.15": "Poisson, TPOT 150ms", "bench_sim_bursty": "Bursty, TPOT 100ms"}
+              "bench_sim_tpot0.15": "Poisson, TPOT 150ms", "bench_sim_bursty": "Bursty, TPOT 100ms",
+              "bench_sim_azure_conv": "Azure chat trace", "bench_sim_azure_code": "Azure code trace"}
     fig, ax = plt.subplots(figsize=(7.6, 4.6))
     for i, p in enumerate(order):
         vals = [rob[p]["relative"][k] * 100 for k in scen]
         ax.plot([min(vals), max(vals)], [i, i], color=GRID, lw=3, solid_capstyle="round", zorder=1)
-    for k, c, m in zip(scen, [BLUE, ORANGE, AQUA, VIOLET], ["o", "s", "^", "D"]):
+    for k, c, m in zip(scen, [BLUE, ORANGE, AQUA, VIOLET, MAGENTA, GREEN], ["o", "s", "^", "D", "v", "P"]):
         ax.scatter([rob[p]["relative"][k] * 100 for p in order], range(len(order)), color=c, marker=m, s=46,
                    edgecolors=SURF, linewidths=1.5, zorder=3, label=labels.get(k, k))
     ax.set_yticks(range(len(order)))
     ax.set_yticklabels([names.get(p, p.replace("chunked-edf-", "chunked+EDF-")) for p in order])
     ax.set_xlabel("Capacity at 90% SLO attainment, % of best policy in that scenario")
-    ax.set_title("No fixed budget wins everywhere; Pacer stays within 2%", loc="left")
-    ax.legend(fontsize=8.5, loc="upper center", bbox_to_anchor=(0.4, -0.14), ncol=4, handletextpad=0.2, columnspacing=1)
+    worst = min(rob.get(k, {}).get("worst", 1.0) for k in ("pacer", "pacer-online"))
+    ax.set_title(f"No fixed budget wins everywhere; Pacer never falls below {worst*100:.0f}% of best", loc="left")
+    ax.legend(fontsize=8.5, loc="upper center", bbox_to_anchor=(0.4, -0.14), ncol=3, handletextpad=0.2, columnspacing=1)
     ax.set_xlim(40, 103)
-    fig.set_size_inches(8.4, 5.0)
+    fig.set_size_inches(8.4, 5.6)
     fig.tight_layout()
     fig.savefig(FIG / "robustness.png", dpi=160)
     plt.close(fig)
 
 
+def drift_timeline_fig():
+    p = R / "drift_timeline.json"
+    if not p.exists():
+        return
+    d = json.load(open(p))
+    a, b = d["window"]
+    fig, ax = plt.subplots(figsize=(8.4, 4.2))
+    ax.axvspan(a, b, color=GRID, alpha=0.7, lw=0)
+    for key, c, lw in [("chunked-edf-128", VIOLET, 1.6), ("pacer", GREEN, 1.6), ("pacer-online", BLUE, 2.4)]:
+        req = sorted(d["runs"][key]["requests"])
+        t = np.array([x[0] for x in req])
+        v = np.array([x[1] <= d["slo_tpot"] for x in req], float)
+        k = 15
+        roll = np.convolve(v, np.ones(k) / k, mode="valid") * 100
+        lab = {"chunked-edf-128": "Chunked + EDF, 128 tok (tuned)", "pacer": "Pacer, offline calibration",
+               "pacer-online": "Pacer + online conformal"}[key]
+        ax.plot(t[k - 1:], roll, color=c, lw=lw, label=lab)
+    ax.set_ylim(0, 104)
+    ax.set_xlabel("Time (s)")
+    ax.set_ylabel("Requests meeting TPOT SLO (%, rolling 15)")
+    ax.set_title(f"Hardware {d['factor']}x slower in the shaded window (simulated neighbour job)\n"
+                 "Only online conformal calibration keeps users inside the TPOT SLO", loc="left", fontsize=11)
+    ax.legend(fontsize=9, loc="lower left")
+    fig.tight_layout()
+    fig.savefig(FIG / "drift_timeline.png", dpi=160)
+    plt.close(fig)
+
+
+def drift_bars_fig():
+    groups = [("bench_sim_drift1.5", "Sim, 1.5x slowdown", 4.0), ("bench_sim_drift2.0", "Sim, 2.0x slowdown", 4.0),
+              ("bench_real_hog", "Real engine, noisy neighbour", 5.0)]
+    pols = [("chunked-128", AQUA, "Chunked-128 (Sarathi)"), ("chunked-edf-128", VIOLET, "Chunked + EDF, 128"),
+            ("pacer", GREEN, "Pacer, offline"), ("pacer-online", BLUE, "Pacer + online conformal")]
+    data = []
+    for f, lab, rate in groups:
+        rows = load(R / f"{f}.jsonl")
+        if not rows:
+            continue
+        vals = [np.mean([r["slo_attainment_drift"] for r in rows if r["policy"] == p and r["rate"] == rate]) * 100
+                for p, _, _ in pols]
+        data.append((f"{lab}\n(load {rate:g} req/s)", vals))
+    if not data:
+        return
+    fig, ax = plt.subplots(figsize=(8.4, 4.2))
+    w = 0.2
+    for j, (p, c, lab) in enumerate(pols):
+        xs = np.arange(len(data)) + (j - 1.5) * w
+        ys = [v[j] for _, v in data]
+        ax.bar(xs, ys, width=w - 0.02, color=c, label=lab)
+        for x, y in zip(xs, ys):
+            ax.text(x, y + 1, f"{y:.0f}", ha="center", va="bottom", fontsize=8, color=INK2)
+    ax.set_xticks(range(len(data)))
+    ax.set_xticklabels([g for g, _ in data])
+    ax.set_ylabel("SLO attainment of requests in flight\nduring the slowdown (%)")
+    ax.set_ylim(0, 110)
+    ax.set_title("When the hardware slows down mid-run", loc="left")
+    ax.legend(fontsize=8.5, ncol=4, loc="upper center", bbox_to_anchor=(0.5, -0.2), handletextpad=0.3, columnspacing=1)
+    ax.grid(axis="x", visible=False)
+    fig.set_size_inches(8.8, 4.8)
+    fig.tight_layout()
+    fig.savefig(FIG / "drift.png", dpi=160)
+    plt.close(fig)
+
+
+def risk_fig():
+    p = R / "summary.json"
+    if not p.exists():
+        return
+    d = json.load(open(p)).get("bench_sim_risk")
+    if not d:
+        return
+    pts = [(50, "pacer-risk50"), (80, "pacer-risk80"), (90, "pacer"), (95, "pacer-risk95"), (99, "pacer-risk99")]
+    xs = [c for c, k in pts if k in d]
+    ys = [d[k]["attainment"][d[k]["rates"].index(6.0)] * 100 for c, k in pts if k in d]
+    fig, ax = plt.subplots(figsize=(6.4, 4.0))
+    ax.plot(xs, ys, color=BLUE, lw=2.4, marker="o")
+    for x, y in zip(xs, ys):
+        ax.text(x, y + 2, f"{y:.0f}%", ha="center", color=INK2, fontsize=9)
+    ax.set_xticks(xs)
+    ax.set_xticklabels([f"{x}%" for x in xs])
+    ax.set_ylim(0, 105)
+    ax.set_xlabel("Conformal coverage level the scheduler plans for")
+    ax.set_ylabel("SLO attainment at 6 req/s (%)")
+    ax.set_title("The risk dial: too greedy and too cautious both lose", loc="left")
+    fig.tight_layout()
+    fig.savefig(FIG / "risk_dial.png", dpi=160)
+    plt.close(fig)
+
+
 def main():
     setup()
+    risk_fig()
+    drift_timeline_fig()
+    drift_bars_fig()
     robustness_fig()
     costmodel_fig()
     roofline_fig()
     real = aggregate(load(R / "bench_real.jsonl"))
     sim = aggregate(load(R / "bench_sim.jsonl"))
-    main_p = ["pacer", "chunked-edf-best", "chunked-best", "prefill-first", "chunked-64", "chunked-128", "chunked-256", "chunked-512"]
+    main_p = ["pacer-online", "pacer", "chunked-edf-best", "chunked-best", "prefill-first", "chunked-64", "chunked-128", "chunked-256", "chunked-512"]
     if real:
         real, best = add_best_chunked(real)
         slo_curve(real, best, FIG / "slo_real.png", "Real engine (measured on CPU): SLO attainment vs load", main_p)
@@ -208,13 +304,20 @@ def main():
         sim, best = add_best_chunked(sim)
         slo_curve(sim, best, FIG / "slo_sim.png", "Simulator: SLO attainment vs load", main_p)
         slo_curve(sim, best, FIG / "ablation.png", "Ablation (simulator): what each idea buys",
-                  ["pacer", "pacer-no-slack", "pacer-no-edf", "chunked-edf-best", "chunked-best"])
-    for tag in ["_bursty"]:
+                  ["pacer", "pacer-slack", "pacer-edf", "pacer-fcfs", "chunked-edf-best", "chunked-best"])
+    for tag, title in [("_bursty", "Bursty traffic (CV=3, simulator)"),
+                       ("_azure_conv", "Azure production chat trace (simulator)"),
+                       ("_azure_code", "Azure production code trace (simulator)")]:
         b = aggregate(load(R / f"bench_sim{tag}.jsonl"))
         if b:
             b, best = add_best_chunked(b)
-            slo_curve(b, best, FIG / f"slo_sim{tag}.png", "Bursty traffic (CV=3, simulator)", main_p)
-    sim_vs_real_fig(real, sim)
+            slo_curve(b, best, FIG / f"slo_sim{tag}.png", title, main_p)
+    ra = aggregate(load(R / "bench_real_azure_conv.jsonl"))
+    if ra:
+        ra, best = add_best_chunked(ra)
+        slo_curve(ra, best, FIG / "slo_real_azure.png", "Real engine on the Azure production chat trace", main_p)
+    sim0 = aggregate([r for r in load(R / "bench_sim.jsonl") if r["seed"] == 0])  # same traces as the real runs
+    sim_vs_real_fig(real, sim0)
     print("figures:", sorted(p.name for p in FIG.glob("*.png")))
 
 

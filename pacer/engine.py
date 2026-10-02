@@ -147,16 +147,19 @@ class SimExecutor:
     """Replays a step using a latency model. Optional multiplicative lognormal noise
     reproduces the jitter of real hardware."""
 
-    def __init__(self, latency_model, blocks: BlockManager, noise: float = 0.0, seed: int = 0):
+    def __init__(self, latency_model, blocks: BlockManager, noise: float = 0.0, seed: int = 0, slowdown=None):
         import numpy as np
         self.lat = latency_model
         self.blocks = blocks
         self.noise = noise
+        self.slowdown = slowdown  # optional f(now) -> multiplier, models hardware drift
         self.rng = np.random.default_rng(seed)
 
     def execute(self, batch: list[tuple[Request, int]], now: float) -> float:
         dt = float(self.lat.predict(StepShape.of(batch)))
         if self.noise:
             dt *= float(self.rng.lognormal(0.0, self.noise))
+        if self.slowdown is not None:
+            dt *= self.slowdown(now)
         _apply_progress(batch, [None] * len(batch), now + dt)
         return dt

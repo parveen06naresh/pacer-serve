@@ -13,14 +13,14 @@ from pathlib import Path
 
 import torch
 
-from pacer.costmodel import LinearModel
+from pacer.costmodel import LinearModel, OnlineConformal
 from pacer.engine import BlockManager, RealExecutor, SimExecutor
 from pacer.metrics import summarize
 from pacer.model import build_model
 from pacer.request import SLO
 from pacer.runtime import serve
 from pacer.scheduler import ChunkedFixed, Pacer, PrefillFirst
-from pacer.workload import WorkloadSpec, generate
+from pacer.workload import WorkloadSpec, from_azure, generate
 
 NUM_BLOCKS, BLOCK_SIZE = 6144, 16
 
@@ -37,14 +37,44 @@ def policies(lat, slo, which: list[str]):
         "chunked-edf-256": lambda: ChunkedFixed(256, edf=Pacer(lat, slo)),
         "chunked-edf-512": lambda: ChunkedFixed(512, edf=Pacer(lat, slo)),
         "pacer": lambda: Pacer(lat, slo),
-        "pacer-no-slack": lambda: Pacer(lat, slo, use_slack=False, name="pacer w/o slack"),
-        "pacer-no-edf": lambda: Pacer(lat, slo, use_edf=False, name="pacer w/o EDF"),
+        "pacer-online": lambda: Pacer(lat, slo, online=OnlineConformal(alpha=0.1), name="pacer + online conformal"),
+        "pacer-slack": lambda: Pacer(lat, slo, use_slack=True, name="pacer + slack banking"),
+        "pacer-edf": lambda: Pacer(lat, slo, order="edf", name="pacer, EDF instead of Moore-Hodgson"),
+        "pacer-fcfs": lambda: Pacer(lat, slo, use_edf=False, name="pacer, FCFS order"),
         "pacer-risk50": lambda: Pacer(lat, slo, coverage=0.5, name="pacer @50% coverage"),
         "pacer-risk80": lambda: Pacer(lat, slo, coverage=0.8, name="pacer @80% coverage"),
         "pacer-risk95": lambda: Pacer(lat, slo, coverage=0.95, name="pacer @95% coverage"),
         "pacer-risk99": lambda: Pacer(lat, slo, coverage=0.99, name="pacer @99% coverage"),
     }
     return [(k, table[k]) for k in which]
+
+
+class Hog:
+    """A noisy neighbour: a separate process that spins one core for `duty` of every 4 ms,
+    switched on and off as the serving clock crosses the window (models a co-located
+    job, thermal throttling, or a shared-GPU tenant). It stalls the engine's parallel
+    regions, so even a fraction of one core costs far more than its share."""
+
+    def __init__(self, window, duty: float):
+        self.window, self.duty, self.proc = window, duty, None
+
+    def __call__(self, now: float):
+        inside = self.window[0] <= now < self.window[1]
+        if inside and self.proc is None:
+            import subprocess
+            import sys
+            d = self.duty
+            code = ("import time\nwhile True:\n    t = time.perf_counter()\n"
+                    f"    while time.perf_counter() - t < {d} * 0.004: pass\n    time.sleep({1 - d} * 0.004)")
+            self.proc = subprocess.Popen([sys.executable, "-c", code])
+        elif not inside and self.proc is not None:
+            self.stop()
+
+    def stop(self):
+        if self.proc is not None:
+            self.proc.kill()
+            self.proc.wait()
+            self.proc = None
 
 
 def main():
@@ -63,6 +93,12 @@ def main():
     ap.add_argument("--noise", type=float, default=0.0, help="simulator lognormal jitter")
     ap.add_argument("--preset", default="tiny")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--trace", default="synthetic", choices=["synthetic", "azure-conv", "azure-code"])
+    ap.add_argument("--drift", type=float, nargs=3, metavar=("START", "END", "FACTOR"), default=None,
+                    help="sim: steps between START and END (fractions of the trace span) run FACTOR x slower")
+    ap.add_argument("--hog", type=float, nargs=3, metavar=("START", "END", "DUTY"), default=None,
+                    help="real: run a noisy-neighbour process busy DUTY of the time between START and END "
+                         "(fractions of span); DUTY 0.35 slows this engine ~1.5x, 0.5 ~1.75x")
     ap.add_argument("--out", default=None)
     ap.add_argument("--tag", default="")
     args = ap.parse_args()
@@ -82,8 +118,19 @@ def main():
     with open(out_path, "a") as f:
         for seed in args.seeds:
             for rate in args.rates:
-                spec = WorkloadSpec(rate=rate, num_requests=args.num_requests, burstiness=args.burstiness, seed=seed)
-                trace = generate(spec, vocab_size=model.cfg.vocab_size if model else None)
+                vocab = model.cfg.vocab_size if model else None
+                if args.trace == "synthetic":
+                    spec = WorkloadSpec(rate=rate, num_requests=args.num_requests, burstiness=args.burstiness, seed=seed)
+                    trace = generate(spec, vocab_size=vocab)
+                else:
+                    trace = from_azure(args.trace.split("-")[1], rate, args.num_requests, window=seed,
+                                       vocab_size=vocab, seed=seed)
+                span = trace[-1].arrival - trace[0].arrival
+                window = None
+                if args.drift:
+                    window = (args.drift[0] * span, args.drift[1] * span)
+                elif args.hog:
+                    window = (args.hog[0] * span, args.hog[1] * span)
                 for key, make in policies(lat, slo, args.policies):
                     reqs = copy.deepcopy(trace)
                     bm = BlockManager(NUM_BLOCKS, BLOCK_SIZE)
@@ -93,11 +140,28 @@ def main():
                         executor.blocks = bm
                         ex = executor
                     else:
-                        ex = SimExecutor(sim_lat, bm, noise=args.noise, seed=seed)
+                        slow = None
+                        if args.drift:
+                            a, b, k = window[0], window[1], args.drift[2]
+                            slow = lambda now, a=a, b=b, k=k: k if a <= now < b else 1.0  # noqa: E731
+                        ex = SimExecutor(sim_lat, bm, noise=args.noise, seed=seed, slowdown=slow)
                     sched = make()
-                    steps = serve(reqs, sched, ex, bm)
+                    hog = Hog(window, args.hog[2]) if (args.hog and args.mode == "real") else None
+                    try:
+                        steps = serve(reqs, sched, ex, bm, on_time=hog)
+                    finally:
+                        if hog:
+                            hog.stop()
                     m = summarize(key, rate, reqs, slo, steps).as_dict()
-                    m.update(mode=args.mode, seed=seed, burstiness=args.burstiness, slo_ttft=slo.ttft, slo_tpot=slo.tpot)
+                    m.update(mode=args.mode, seed=seed, burstiness=args.burstiness, slo_ttft=slo.ttft, slo_tpot=slo.tpot,
+                             trace=args.trace, drift=args.drift, hog=args.hog)
+                    if window:
+                        # Requests that were in flight while the hardware was degraded.
+                        hit = [r for r in reqs if r.arrival < window[1] and r.finish_time >= window[0]]
+                        m["slo_attainment_drift"] = sum(slo.met(r) for r in hit) / max(len(hit), 1)
+                        m["tpot_attainment_drift"] = sum(r.tpot() <= slo.tpot for r in hit) / max(len(hit), 1)
+                    if getattr(sched, "online", None) is not None:
+                        m["online_miss_rate"] = sched.online.misses / max(sched.online.n, 1)
                     f.write(json.dumps(m) + "\n")
                     f.flush()
                     print(f"[{args.mode} seed={seed} rate={rate:4.1f}] {key:15s} SLO={m['slo_attainment']*100:5.1f}%  "

@@ -1,90 +1,100 @@
 # Showcasing Pacer
 
-Everything below quotes numbers that are in `results/`. Do not round them up.
+Every number below is in `results/`. Quote them exactly; don't round up.
 
-## Resume bullets (pick 2-3; tailor the first word to the role)
+## Resume bullets (pick 3; lead with the one that fits the role)
 
-**Pacer: SLO-aware LLM inference server** | Python, PyTorch, NumPy, SciPy, scikit-learn | github.com/<you>/pacer-serve
+**Pacer: LLM inference server with online risk-controlled scheduling** | Python, PyTorch, SciPy, scikit-learn | github.com/<you>/pacer-serve
 
 - Built an LLM inference engine from scratch (Llama-style GQA model, PagedAttention-style
   paged KV cache, continuous batching, chunked prefill), verified token-exact against a
   full-recompute reference.
-- Designed a model-predictive scheduler driven by a learned step-latency model (7.3% MAPE;
-  4.4% when extrapolating, vs 50.8% for gradient-boosted trees), serving **24% more load
-  at 90% SLO attainment** than the best-tuned Sarathi-style chunked-prefill baseline on
-  the real engine.
-- Added split-conformal risk bounds (90% bound: 93.3% empirical coverage on held-out
-  steps) so the scheduler targets a chosen tail probability instead of a mean forecast.
-- Showed with a validated discrete-event simulator (4.4-point mean error vs. real runs)
-  that every fixed-budget policy loses 30-54% capacity in some scenario while Pacer stays
-  within 2% of the best in all four; projected the effect to H100/A100/L40S/L4 with a
-  roofline model.
+- Designed a scheduler that keeps latency SLOs under hardware drift using online
+  conformal prediction; under a real noisy-neighbour slowdown it kept **85%** of users
+  within SLO vs **49%** for the best standard scheduler, holding its 10% risk target
+  (8.5-10.4% observed) on real hardware.
+- Learned a physics-informed step-latency model (7.3% error, 4.4% when extrapolating vs
+  50.8% for gradient-boosted trees) and used it for model-predictive batching, reaching
+  **+49% capacity** at 90% SLO attainment over vLLM/Sarathi-style fixed budgets.
+- Applied Moore-Hodgson (exact minimisation of missed deadlines) to prompt ordering:
+  **+21%** capacity on the bursty Azure production code trace; across six workloads
+  including two Azure production traces, never below 94% of the best policy, where every
+  fixed configuration dropped to 70% or worse.
 
-Track-specific first lines:
-- **NVIDIA / AI infra:** lead with the engine + roofline (KV-cache bandwidth, ridge point,
-  "free" prefill tokens per GPU).
-- **FAANG SWE/MLE:** lead with system design + measured goodput gain + test discipline.
-- **Quant:** lead with "risk-calibrated real-time optimization": conformal bounds, honest
-  ablations, tail latency, extrapolation failure of tree models.
+Lead with:
+- **NVIDIA / AI infra:** the engine, the KV-cache/roofline analysis, and the drift result
+  (shared GPUs and noisy neighbours are a real datacenter problem).
+- **FAANG SWE/MLE:** system design, measured impact on production traces, test discipline,
+  honest ablations.
+- **Quant:** "online risk control with a distribution-free guarantee, verified empirically;
+  model selection driven by out-of-sample extrapolation; an exact combinatorial
+  optimisation in the hot loop". Quant interviewers will push on ACI's guarantee; know it.
 
 ## LinkedIn post (draft)
 
-> I built an LLM inference server from scratch to answer one question: how much work
-> should go into each GPU step?
+> Most LLM servers have a fixed safety margin baked in. What happens when the hardware
+> gets slower mid-flight?
 >
-> Every chat model mixes two jobs on the same chip: reading prompts (compute-bound) and
-> generating tokens (memory-bound). Put too much prompt work in a step and everyone
-> mid-answer stutters; too little and new users wait. Today's servers use a fixed
-> per-step token budget that has to be re-tuned for every model, GPU and SLO.
+> I built Pacer, an LLM inference server from scratch (paged KV cache, continuous
+> batching, chunked prefill), to find out. Its scheduler predicts how long every step will
+> take, and wraps that prediction in an online conformal bound: a statistical guarantee
+> that re-calibrates after every step, so only ~10% of steps run over budget no matter
+> how the hardware drifts.
 >
-> Pacer learns the step latency instead (7.3% error, and it still holds at 4.4% when
-> extrapolating to step sizes it never saw, where gradient-boosted trees fall apart at
-> 51%), wraps it in conformal risk bounds, and picks the largest step that keeps every
-> user inside their latency target.
+> When I started a noisy-neighbour process mid-run, Pacer kept 85% of users within their
+> latency targets. The best standard scheduler kept 49%. And a version of my own scheduler
+> that trusted its offline calibration did worse than both, at 38%. Being clever without
+> being calibrated is a liability.
 >
-> Results on my engine: 24% more traffic served at a 90% SLO than the best-tuned
-> chunked-prefill baseline, and within 2% of the best policy across four traffic and SLO
-> scenarios with zero tuning, where every fixed budget loses 30%+ somewhere.
+> Also inside: a learned latency model that still holds within 4.4% on step sizes it never
+> saw (tree models fall apart at 51%), Moore-Hodgson scheduling to save the most requests
+> during traffic bursts, and replay of Microsoft's public Azure LLM production traces.
 >
-> The honest parts are in the README too: one of my three ideas (slack banking) didn't
-> help, and the benchmarks are on CPU with GPU projections, because that's the hardware I
-> had.
+> Honest notes are in the README: one of my ideas didn't work and is reported as a negative
+> result, and the benchmarks are on CPU with GPU projections, because that's the hardware
+> I had.
 >
-> Code, tests, figures and every number: <link>
+> Code, tests, every number, and how to reproduce them: <link>
 >
-> #LLM #MLSystems #GPU #InferenceOptimization #MachineLearning
+> #LLM #MLSystems #InferenceOptimization #GPU #ConformalPrediction
 
 ## 60-second interview pitch
 
-"LLM serving mixes compute-bound prefill and bandwidth-bound decode in the same step, so
-the scheduler is solving a constrained optimisation every few milliseconds. Production
-systems use a fixed token budget. I built an engine from scratch, profiled 600 step
-shapes, and found a physics-shaped linear model predicts step latency within 7%, and,
-crucially, extrapolates, where trees don't. The scheduler binary-searches that model for
-the biggest step that meets every running request's TPOT deadline, scales by a conformal
-bound so it's a probabilistic guarantee, and orders prompts by deadline. It serves 24%
-more load at the same SLO on the real engine. The ablation surprised me: deadline ordering
-is the biggest single win, adaptivity is what makes it robust, and slack banking didn't
-help, which I reported."
+"LLM serving mixes compute-bound prefill and bandwidth-bound decode in every step, so the
+scheduler solves a constrained optimisation every few milliseconds. Production systems use
+a fixed token budget with a hand-set safety margin. I built an engine from scratch,
+profiled it, and found a physics-shaped linear model predicts step latency within 7% and,
+unlike trees, extrapolates. The scheduler binary-searches that model for the biggest step
+that fits the SLO. The interesting part is the margin: I replaced it with adaptive
+conformal inference, which re-calibrates after every step and guarantees the long-run
+miss rate. Under a real noisy neighbour that's 85% of users on target versus 49%, and the
+10% miss target held at 8.5 to 10.4% on real hardware. The biggest surprise was that my
+own scheduler with offline calibration did worst of all under drift."
 
-## Questions you should be ready for
+## Questions to be ready for
 
-1. *Why not just tune the static budget?* Section 3 of the README: the best budget moves
-   from 64 to 128 tokens as the SLO changes, and from ~200 to ~600 across NVIDIA GPUs.
-2. *Why linear and not a neural net?* Extrapolation and microsecond inference inside a
-   control loop; the GBDT comparison is the evidence.
-3. *What does conformal prediction guarantee?* Marginal coverage under exchangeability.
-   The 99% bound is huge (13x) because rare VM stalls dominate it; that's a real finding
-   about the hardware, not a bug.
-4. *What would change on a GPU?* Absolute numbers and coefficients; the structure
-   (weights streamed per step, KV bandwidth for decode) is the same. Re-profile with
-   `--device cuda` (about 10 minutes) and everything else runs unchanged.
-5. *Why does Pacer's p99 TTFT look worse at overload?* It lets hopeless requests wait so
-   savable ones make their deadline; that is the goodput objective. Say it before they do.
+1. **What exactly does ACI guarantee?** The long-run average of 1[ratio > bound] converges
+   to alpha for any sequence of ratios (no exchangeability needed), at rate ~1/(gamma*T).
+   It does not guarantee coverage at every moment, and it is a step-level guarantee, not
+   a per-request one; the per-request effect is measured, not proven.
+2. **Why did offline-calibrated Pacer do worst under drift?** It packs steps right up to
+   the bound it believes; when the hardware is 1.5x slower, every step overshoots. Static
+   schedulers leave accidental slack. Online calibration removes the overconfidence.
+3. **Why Moore-Hodgson and not EDF?** EDF is optimal when everything can be on time;
+   under overload it lets one long late job push many short jobs late. Moore-Hodgson is
+   exactly optimal for the number of on-time jobs on one machine. It matters only under
+   bursts, which the ablation shows.
+4. **Why a linear model, not a neural net?** Extrapolation and microsecond inference
+   inside a control loop; the GBDT comparison is the evidence.
+5. **What changes on a GPU?** The coefficients and absolute numbers. The structure
+   (weights streamed every step, KV bandwidth for decode, noisy neighbours on shared GPUs)
+   is the same. Re-profile with `--device cuda` and everything else runs unchanged.
+6. **Why does Pacer's p99 TTFT look worse at overload?** It lets hopeless requests wait so
+   savable ones make their deadline. That is the goodput objective; say it before they do.
 
-## Next steps that would make it stronger
+## Next upgrades
 
-- Run the same benchmarks on one rented GPU (A10G/L4 on a cloud spot instance costs a few
-  dollars) and add a "measured on GPU" column.
-- Replace the decode gather with a Triton kernel and compare against the PyTorch path.
-- Use the public Azure LLM inference trace instead of synthetic arrivals.
+- One run on a rented GPU (an L4 or A10G for an hour costs a few dollars) for a measured
+  GPU column.
+- Replace the decode gather with a Triton kernel and benchmark it against the PyTorch path.
+- A short arXiv-style write-up (4 pages) of the drift result.

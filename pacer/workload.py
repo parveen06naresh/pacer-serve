@@ -40,3 +40,37 @@ def generate(spec: WorkloadSpec, vocab_size: int | None = None) -> list[Request]
         ids = rng.integers(0, vocab_size, pl).tolist() if vocab_size else None
         reqs.append(Request(i, float(arrivals[i]), pl, ol, prompt_ids=ids))
     return reqs
+
+
+AZURE = {"conv": "data/AzureLLMInferenceTrace_conv.csv", "code": "data/AzureLLMInferenceTrace_code.csv"}
+
+
+def from_azure(kind: str, rate: float, num_requests: int = 200, window: int = 0, len_scale: float = 0.2,
+               prompt_max: int = 1536, output_max: int = 192, vocab_size: int | None = None,
+               seed: int = 0) -> list[Request]:
+    """Replay a window of the public Azure LLM inference trace (Splitwise, ISCA'24).
+
+    Real arrival *pattern* (bursts, lulls) and real prompt/output lengths, with two
+    scalings so a CPU can serve it: time is compressed so the window's mean rate equals
+    `rate`, and lengths are multiplied by `len_scale` (the production trace was served
+    by A100 clusters roughly 100x faster than this engine). `window` picks which
+    consecutive slice of the trace to replay, so different windows act as seeds.
+    """
+    import csv
+    from datetime import datetime
+
+    with open(AZURE[kind]) as f:
+        rows = list(csv.DictReader(f))
+    start = (window * num_requests) % (len(rows) - num_requests)
+    rows = rows[start:start + num_requests]
+    t = np.array([datetime.fromisoformat(r["TIMESTAMP"][:26]).timestamp() for r in rows])
+    t -= t[0]
+    t *= (num_requests / rate) / max(t[-1], 1e-9)
+    rng = np.random.default_rng(seed)
+    reqs = []
+    for i, r in enumerate(rows):
+        pl = int(np.clip(round(int(r["ContextTokens"]) * len_scale), 8, prompt_max))
+        ol = int(np.clip(round(int(r["GeneratedTokens"]) * len_scale), 4, output_max))
+        ids = rng.integers(0, vocab_size, pl).tolist() if vocab_size else None
+        reqs.append(Request(i, float(t[i]), pl, ol, prompt_ids=ids))
+    return reqs

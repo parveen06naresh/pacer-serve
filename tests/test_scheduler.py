@@ -57,3 +57,22 @@ def test_edf_puts_hopeless_requests_last():
     fresh = Request(1, arrival=9.9, prompt_len=200, max_new_tokens=5)
     order = pacer._prefill_order(10.0, [old, fresh])
     assert order == [fresh, old]
+
+
+def test_online_conformal_tracks_coverage_through_drift():
+    from pacer.costmodel import OnlineConformal
+    rng = np.random.default_rng(0)
+    oc = OnlineConformal(alpha=0.1, gamma=0.02)
+    # Ratios jump 1.8x a third of the way in (a noisy neighbour arrives) and recover later.
+    scale = np.r_[np.ones(3000), np.full(3000, 1.8), np.ones(3000)]
+    for s in scale:
+        oc.update(float(s * rng.lognormal(0, 0.1)))
+    assert abs(oc.misses / oc.n - 0.1) < 0.02
+
+
+def test_azure_trace_replay_scales_rate_and_lengths():
+    from pacer.workload import from_azure
+    reqs = from_azure("conv", rate=4.0, num_requests=200)
+    span = reqs[-1].arrival - reqs[0].arrival
+    assert abs(200 / span - 4.0) < 1e-6
+    assert all(8 <= r.prompt_len <= 1536 and 4 <= r.max_new_tokens <= 192 for r in reqs)
