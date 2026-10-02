@@ -4,7 +4,7 @@ Every number below is in `results/`. Quote them exactly; don't round up.
 
 ## Resume bullets (pick 3; lead with the one that fits the role)
 
-**Pacer: LLM inference server with online risk-controlled scheduling** | Python, PyTorch, SciPy, scikit-learn | github.com/<you>/pacer-serve
+**Pacer: LLM inference server with online risk-controlled scheduling** | Python, PyTorch, SciPy, scikit-learn | github.com/parveen06naresh/pacer-serve
 
 - Built an LLM inference engine from scratch (Llama-style GQA model, PagedAttention-style
   paged KV cache, continuous batching, chunked prefill), verified token-exact against a
@@ -92,9 +92,21 @@ own scheduler with offline calibration did worst of all under drift."
 6. **Why does Pacer's p99 TTFT look worse at overload?** It lets hopeless requests wait so
    savable ones make their deadline. That is the goodput objective; say it before they do.
 
-## Next upgrades
+## What to link
 
-- One run on a rented GPU (an L4 or A10G for an hour costs a few dollars) for a measured
-  GPU column.
-- Replace the decode gather with a Triton kernel and benchmark it against the PyTorch path.
-- A short arXiv-style write-up (4 pages) of the drift result.
+- The repository (README leads with the drift result).
+- The paper, `docs/paper/pacer.pdf`: 5 pages, with Proposition 1 (step-level overshoot
+  bound) and its proof. Link it on the resume line as "paper".
+- The project page (interactive latency trace, all headline numbers on one screen).
+- A 20-second screen recording of `pacer demo` makes a good LinkedIn video: real text
+  streaming out of an engine you wrote, with TTFT/TPOT per request.
+
+## Next upgrades (highest value first)
+
+1. Run `notebooks/gpu_benchmark.ipynb` on a free Colab T4 and add the measured GPU column
+   to the README and paper. This removes the biggest caveat ("CPU only").
+2. Replace the decode gather with a Triton kernel and benchmark it against the PyTorch path
+   (strong signal for NVIDIA).
+3. Port the scheduler as a vLLM scheduler plugin and open a discussion with the numbers.
+4. Post the paper to arXiv (cs.DC) once it has GPU numbers; it needs an endorser, so ask
+   a professor.

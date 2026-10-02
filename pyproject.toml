@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pacer-serve"
+version = "0.2.0"
+description = "LLM serving with model-predictive batching and online conformal latency guarantees"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+dependencies = ["torch>=2.5", "numpy", "scipy", "scikit-learn", "matplotlib"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff"]
+
+[project.scripts]
+pacer = "pacer.cli:main"
+
+[tool.setuptools]
+packages = ["pacer"]
+
+[tool.ruff]
+extend-exclude = ["notebooks"]
+line-length = 150
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+ignore = ["E731", "B023", "B905"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

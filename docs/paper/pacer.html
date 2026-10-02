@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pacer: Risk-Controlled Batch Scheduling for LLM Serving under Hardware Drift</title>
+<style>
+  @page { size: Letter; margin: 0.8in 0.85in; }
+  body { font-family: "Times New Roman", "Liberation Serif", "DejaVu Serif", serif; font-size: 10.5pt; line-height: 1.38; color: #111; }
+  h1 { font-size: 17pt; text-align: center; margin: 0 0 6pt; line-height: 1.2; }
+  .authors { text-align: center; font-size: 10.5pt; margin-bottom: 14pt; }
+  .abstract { margin: 0 0.35in 12pt; font-size: 9.8pt; }
+  .abstract b { display: block; text-align: center; margin-bottom: 3pt; }
+  h2 { font-size: 12pt; margin: 14pt 0 4pt; }
+  h3 { font-size: 10.5pt; margin: 10pt 0 3pt; font-style: italic; }
+  p { margin: 0 0 6pt; text-align: justify; }
+  table { border-collapse: collapse; margin: 6pt auto 4pt; font-size: 9pt; }
+  th, td { padding: 2pt 7pt; text-align: right; }
+  th:first-child, td:first-child { text-align: left; }
+  thead tr { border-top: 1.2pt solid #000; border-bottom: 0.6pt solid #000; }
+  tbody tr:last-child { border-bottom: 1.2pt solid #000; }
+  .cap { font-size: 9pt; text-align: center; margin: 2pt 0 10pt; }
+  figure { margin: 8pt 0; text-align: center; break-inside: avoid; }
+  figure img { width: 88%; }
+  figure.half img { width: 62%; }
+  .box { border: 0.6pt solid #444; padding: 6pt 9pt; margin: 6pt 0 8pt; break-inside: avoid; }
+  code, .mono { font-family: "DejaVu Sans Mono", monospace; font-size: 8.8pt; }
+  .eq { text-align: center; margin: 5pt 0; font-style: italic; }
+  ol.refs { font-size: 9pt; padding-left: 16pt; }
+  sup { font-size: 7pt; }
+</style>
+</head>
+<body>
+
+<h1>Pacer: Risk-Controlled Batch Scheduling for<br>LLM Serving under Hardware Drift</h1>
+<div class="authors">Crown<br><span class="mono">github.com/parveen06naresh/pacer-serve</span></div>
+
+<div class="abstract"><b>Abstract</b>
+LLM servers mix compute-bound prefill and bandwidth-bound decode in every batch, and
+production schedulers resolve the resulting latency trade-off with a static per-step token
+budget and a hand-set safety margin. Both assume the hardware behaves as it did when the
+system was tuned. We present <i>Pacer</i>, a scheduler that (i) predicts each step's latency
+with a physics-informed linear model that extrapolates beyond its training range, (ii) wraps
+the prediction in an <i>online</i> conformal bound (adaptive conformal inference) whose
+long-run miss rate is guaranteed for arbitrary, even adversarial, drift, (iii) chooses the
+largest batch whose bounded latency meets the time-per-output-token SLO, and (iv) orders
+prompts with Moore-Hodgson, which exactly minimises missed time-to-first-token deadlines
+under a single-server abstraction. On an engine built from scratch and evaluated with
+synthetic traffic and two public Azure production traces, Pacer keeps 85% of in-flight
+requests within SLO during a real noisy-neighbour slowdown versus 49% for the best static
+baseline, holds its 10% risk target at 8.5-10.4% on real hardware, and never falls below
+94% of the best policy's capacity across six workloads, while every fixed-budget
+configuration falls to 70% or below. A version of Pacer with offline-only calibration
+performs <i>worse</i> than static baselines under drift (38%), which we argue is the
+general hazard of model-predictive control without online calibration.
+</div>
+
+<h2>1&nbsp;&nbsp;Introduction</h2>
+<p>Continuous batching [8] lets an LLM server run prefill (prompt processing) and decode
+(token generation) for many requests in the same forward pass. Every added prefill token
+slows all requests that are mid-generation, raising time per output token (TPOT); every
+withheld token delays someone's time to first token (TTFT). Serving systems are judged on
+<i>goodput</i>, requests per second meeting both SLOs [7]. Chunked prefill [2] caps each
+step at a fixed token budget, which must be tuned per model, accelerator, SLO and workload.</p>
+<p>We make two observations. First, the best budget moves substantially: across our six
+workloads the best fixed budget varies between 64 and 256 tokens, and a roofline analysis
+of Llama-3-8B predicts a 3x spread across current NVIDIA GPUs (Section 5.6). Second, the
+hardware moves at run time: co-tenants on shared accelerators, thermal throttling and
+interference change step latency by tens of percent. A scheduler that packs batches up to a
+latency model's prediction is exactly the scheduler that breaks when the model goes stale.</p>
+<p>Pacer's contribution is to treat batch sizing as a risk-controlled prediction problem.
+It replaces the static budget with a per-step optimisation against a learned latency model
+and replaces the safety margin with an online conformal bound that recalibrates after every
+step. We contribute: (1) a from-scratch serving engine with paged KV cache, continuous
+batching and chunked prefill, verified token-exact against a dense reference; (2) the Pacer
+scheduler; (3) a step-level guarantee and its translation to per-request TPOT (Section 4);
+(4) an evaluation on real execution, real production traces and real interference, including
+negative results.</p>
+
+<h2>2&nbsp;&nbsp;Background</h2>
+<p><b>Prefill and decode.</b> A decode step streams all weights and each request's KV cache
+from memory regardless of batch size, so its cost is dominated by bandwidth; prefill tokens
+add arithmetic that is nearly free until the step reaches the accelerator's ridge point.
+<b>Conformal prediction.</b> Split conformal prediction turns any point predictor into a
+set or bound with finite-sample marginal coverage under exchangeability. Adaptive conformal
+inference (ACI) [5] drops exchangeability: it updates the miscoverage level
+<i>&alpha;<sub>t+1</sub> = &alpha;<sub>t</sub> + &gamma;(&alpha; &minus; err<sub>t</sub>)</i>
+and guarantees that the empirical miss rate converges to &alpha; for any sequence.
+<b>Scheduling.</b> Maximising the number of on-time jobs on one machine
+(1&#8214;&Sigma;U<sub>j</sub>) is solved exactly by Moore-Hodgson [6] in O(n log n).</p>
+
+<h2>3&nbsp;&nbsp;Design</h2>
+<h3>3.1 Step-latency model</h3>
+<p>For a step with prefill chunks (n<sub>i</sub>, L<sub>i</sub>) and decodes with contexts
+c<sub>j</sub>, we use features
+x = [1, &Sigma;n<sub>i</sub>+|D|, &Sigma;n<sub>i</sub>L<sub>i</sub>, &Sigma;c<sub>j</sub>,
+|D|&middot;max c<sub>j</sub>, |P|, |D|] (fixed cost, GEMM tokens, prefill attention FLOPs,
+decode KV bytes, padded attention work, per-sequence overheads) and fit non-negative
+coefficients minimising relative error. Each coefficient has a physical unit, which is why
+the model extrapolates (Table 4). Prediction is a dot product.</p>
+<h3>3.2 Online risk control</h3>
+<p>After each step Pacer observes r<sub>t</sub> = a<sub>t</sub>/p<sub>t</sub>, the ratio of
+actual to predicted latency (including scheduling overhead). It keeps a window of recent
+ratios and sets q<sub>t</sub> to their empirical (1&minus;&alpha;<sub>t</sub>)-quantile,
+updating &alpha;<sub>t</sub> by the ACI rule with target &alpha; = 0.1 and &gamma; = 0.02.</p>
+<h3>3.3 Model-predictive budget</h3>
+<p>Given the running decodes D and the ordered prefill queue, Pacer binary-searches the
+largest prefill budget c such that q<sub>t</sub>&middot;p(D, chunks(c)) &le; &tau;, where
+&tau; is the TPOT SLO. Chunks are filled greedily from the head of the queue.</p>
+<h3>3.4 Moore-Hodgson ordering</h3>
+<p>Each waiting prompt j has deadline d<sub>j</sub> = arrival<sub>j</sub> + TTFT SLO and a
+processing time equal to its marginal cost under the latency model, scaled by the current
+median ratio. Pacer runs Moore-Hodgson: scan in deadline order, accumulate processing
+time, and whenever the running total passes the current deadline, evict the longest
+scanned prompt to a late set. On-time prompts are served in deadline order, then late ones
+in arrival order. Late prompts are still served; they stop consuming capacity that could
+save others.</p>
+
+<h2>4&nbsp;&nbsp;Analysis</h2>
+<div class="box">
+<p><b>Proposition 1 (step-level overshoot).</b> Let &tau; be the TPOT SLO and suppose that at
+every step where a decode-only batch is predicted feasible, Pacer selects a batch with
+q<sub>t</sub>p<sub>t</sub> &le; &tau;. Let &rho;<sub>T</sub> be the fraction of the first
+T steps where even the decode-only batch is predicted infeasible. Then the fraction of steps
+whose actual latency exceeds &tau; is at most</p>
+<p class="eq">&alpha; + (max(&alpha;<sub>1</sub>, 1&minus;&alpha;<sub>1</sub>) + &gamma;) / (&gamma;T) + &rho;<sub>T</sub>.</p>
+<p><i>Proof.</i> On a feasible step without an ACI miss, a<sub>t</sub> = r<sub>t</sub>p<sub>t</sub>
+&le; q<sub>t</sub>p<sub>t</sub> &le; &tau;. So overshoots occur only on misses or infeasible
+steps. Gibbs and Cand&egrave;s [5, Prop. 4.1] bound the empirical miss frequency by &alpha;
+plus the second term for every sequence of ratios. &#9633;</p>
+<p><b>Corollary 1 (per-request TPOT).</b> If ratios are bounded by R and q<sub>t</sub> &ge;
+q<sub>min</sub>, a request whose decode steps include a fraction f of misses (and no
+infeasible steps) has TPOT &le; &tau;&middot;(1 + f&middot;(R/q<sub>min</sub> &minus; 1)).</p>
+</div>
+<p>The proposition is distribution-free; the corollary makes explicit what is <i>not</i>
+guaranteed: per-request SLOs depend on how misses cluster within requests and on the
+tail ratio R. We therefore measure the mapping empirically (Section 5.1). Moore-Hodgson's
+optimality holds exactly for the single-server abstraction with known processing times;
+batching, decode interference and prediction error make it a heuristic in practice.</p>
+
+<h2>5&nbsp;&nbsp;Evaluation</h2>
+<p><b>Setup.</b> A Llama-architecture decoder (RMSNorm, RoPE, GQA, SwiGLU; 63M parameters,
+FP32) runs on a 4-core cloud CPU; no GPU was available, so Section 5.6 is an analytic
+projection. Workloads: Poisson and Gamma (CV=3) arrivals with lognormal lengths, and replays
+of the Azure LLM inference traces [4] (chat and code), with time compressed and lengths
+scaled by 0.2. SLOs are TTFT 2 s and TPOT 100 ms unless stated. Capacity is the highest load
+at which at least 90% of requests meet both SLOs. Baselines: prefill-first (vLLM v0 [1]),
+chunked prefill with fixed budgets (Sarathi-Serve [2]), and chunked prefill with Pacer's
+deadline ordering (a strengthened baseline). A discrete-event simulator shares the serving
+loop, schedulers and memory manager with the real engine and matches its SLO attainment to
+within 3.3 points on average over 40 paired runs.</p>
+
+<h3>5.1 Hardware drift</h3>
+<p>On the real engine, a neighbour process spinning 35% of one core during the middle 40% of
+each run slows steps by roughly 1.5x. Table 1 reports attainment of requests in flight during
+the slowdown at 5 req/s; Figure 1 adds simulator results with 1.5x and 2.0x slowdowns.</p>
+<table><thead><tr><th>Real engine, noisy neighbour, 5 req/s</th><th>In drift</th><th>Overall</th></tr></thead><tbody>
+<tr><td>Chunked, 128 tokens</td><td>47.7%</td><td>71.5%</td></tr>
+<tr><td>Chunked + deadline ordering, 128 tokens</td><td>48.6%</td><td>72.0%</td></tr>
+<tr><td>Pacer, offline calibration</td><td>37.6%</td><td>66.0%</td></tr>
+<tr><td><b>Pacer, online calibration</b></td><td><b>85.3%</b></td><td><b>92.0%</b></td></tr>
+</tbody></table>
+<div class="cap">Table 1. SLO attainment under real interference.</div>
+<figure><img src="../figures/drift.png"><div class="cap">Figure 1. Attainment of requests in flight during a slowdown (simulator: 3 seeds).</div></figure>
+<p>Offline-calibrated Pacer is the worst policy under drift: it fills each step to the bound
+it believes, so every step overshoots once the hardware slows; static budgets leave
+accidental slack. With online calibration the observed fraction of steps over the bound was
+9.9-10.2% (synthetic), 10.1-10.4% (Azure chat), 8.5-9.6% (noisy neighbour) and 9.4-10.1%
+(24 simulated drift runs), against a 10% target.</p>
+
+<h3>5.2 Steady state</h3>
+<table><thead><tr><th>Real engine</th><th>5 req/s</th><th>6 req/s</th><th>7 req/s</th><th>Capacity</th></tr></thead><tbody>
+<tr><td>Prefill-first</td><td>77.5%</td><td>9.0%</td><td>4.5%</td><td>4.19</td></tr>
+<tr><td>Chunked, best fixed (128)</td><td>86.0%</td><td>51.0%</td><td>21.0%</td><td>4.71</td></tr>
+<tr><td>Chunked + deadline ordering (128)</td><td>91.5%</td><td>89.5%</td><td>91.5%</td><td>5.75</td></tr>
+<tr><td>Pacer, offline</td><td>96.5%</td><td>90.5%</td><td>90.0%</td><td>7.00</td></tr>
+<tr><td>Pacer, online</td><td>98.0%</td><td>90.0%</td><td>87.0%</td><td>6.00</td></tr>
+</tbody></table>
+<div class="cap">Table 2. SLO attainment and capacity (req/s) on the real engine. Run-to-run variance on the shared VM is material: an earlier run measured the fixed-128 baseline at 5.36 req/s.</div>
+
+<h3>5.3 Robustness across workloads</h3>
+<table><thead><tr><th>Policy</th><th>P-100</th><th>P-60</th><th>P-150</th><th>Burst</th><th>Az-chat</th><th>Az-code</th><th>Worst</th></tr></thead><tbody>
+<tr><td>Pacer, offline</td><td>1.00</td><td>0.99</td><td>1.00</td><td>0.98</td><td>0.97</td><td>1.00</td><td><b>0.97</b></td></tr>
+<tr><td>Pacer, online</td><td>0.99</td><td>1.00</td><td>0.96</td><td>1.00</td><td>1.00</td><td>0.94</td><td><b>0.94</b></td></tr>
+<tr><td>Chunked + EDF, 128</td><td>0.99</td><td>0.70</td><td>0.94</td><td>0.88</td><td>0.95</td><td>0.99</td><td>0.70</td></tr>
+<tr><td>Chunked + EDF, 64</td><td>0.91</td><td>0.95</td><td>0.87</td><td>0.62</td><td>0.82</td><td>0.70</td><td>0.62</td></tr>
+<tr><td>Chunked, 128</td><td>0.79</td><td>0.70</td><td>0.76</td><td>0.68</td><td>0.80</td><td>0.45</td><td>0.45</td></tr>
+<tr><td>Prefill-first</td><td>0.66</td><td>0.65</td><td>0.74</td><td>0.61</td><td>0.63</td><td>0.00</td><td>0.00</td></tr>
+</tbody></table>
+<div class="cap">Table 3. Capacity relative to the best policy per workload (simulator; 3-5 seeds). P-x: Poisson with TPOT SLO x ms.</div>
+
+<h3>5.4 Latency model</h3>
+<table><thead><tr><th>Model (600 profiled steps)</th><th>Random split</th><th>Extrapolation</th></tr></thead><tbody>
+<tr><td>Roofline, measured peaks + 2 fitted scalars</td><td>50.2%</td><td>81.0%</td></tr>
+<tr><td>Gradient-boosted trees</td><td>17.9%</td><td>50.8%</td></tr>
+<tr><td>Linear + GBDT residual</td><td>9.9%</td><td>5.0%</td></tr>
+<tr><td><b>Physics-informed linear</b></td><td><b>7.3%</b></td><td><b>4.4%</b></td></tr>
+</tbody></table>
+<div class="cap">Table 4. Mean absolute percentage error. Extrapolation trains on steps of at most 512 tokens and tests on larger ones.</div>
+
+<h3>5.5 Ablations</h3>
+<table><thead><tr><th>Capacity (req/s, 5 seeds)</th><th>Poisson</th><th>Azure chat</th><th>Azure code</th></tr></thead><tbody>
+<tr><td>Pacer</td><td>6.57</td><td>8.46</td><td>2.00</td></tr>
+<tr><td>&nbsp;&nbsp;EDF instead of Moore-Hodgson</td><td>6.54</td><td>8.60</td><td>1.65</td></tr>
+<tr><td>&nbsp;&nbsp;FCFS ordering</td><td>5.22</td><td>7.30</td><td>1.07</td></tr>
+<tr><td>&nbsp;&nbsp;with slack banking</td><td>6.38</td><td>8.53</td><td>2.00</td></tr>
+<tr><td>Best fixed budget, FCFS</td><td>5.19</td><td>7.01</td><td>1.08</td></tr>
+</tbody></table>
+<div class="cap">Table 5. Deadline-aware ordering is the largest steady-state gain; Moore-Hodgson matters only under extreme burstiness (+21% on the code trace); spending banked TPOT slack did not help and is disabled by default.</div>
+<figure class="half"><img src="../figures/risk_dial.png"><div class="cap">Figure 2. The coverage level as a risk dial (simulator with 8% step jitter, 6 req/s).</div></figure>
+
+<h3>5.6 Projection to GPUs</h3>
+<p>For Llama-3-8B in BF16 with 32 decodes at 2k context, a roofline model from datasheet
+peaks gives the prefill tokens that can join a decode step before it becomes compute-bound:
+about 200 on A100, 424 on H100, 592 on L4 and 624 on L40S. These are projections, not
+measurements; the repository includes a one-command GPU reproduction.</p>
+
+<h2>6&nbsp;&nbsp;Related Work</h2>
+<p>PagedAttention/vLLM [1] introduced paged KV caches; Orca [8] continuous batching;
+Sarathi-Serve [2] chunked prefill with a fixed budget; DistServe [7] optimises goodput by
+disaggregating prefill and decode; Splitwise [4] studies phase splitting and released the
+traces used here. Conformal prediction has been applied to forecasting and control [3, 5].
+We are not aware of prior work that sizes LLM serving batches with an online conformal
+latency bound and evaluates it under live interference.</p>
+
+<h2>7&nbsp;&nbsp;Limitations</h2>
+<p>Measurements use a CPU and a small model; absolute latencies do not transfer, though the
+prefill/decode structure and the drift mechanism do. Trace replay compresses time and
+lengths. Requests reserve their full KV footprint at admission (no preemption). Pacer raises
+goodput partly by letting hopeless requests wait, worsening their TTFT. Section 4 guarantees
+step-level coverage only; per-request effects are measured, not proven.</p>
+
+<h2>References</h2>
+<ol class="refs">
+<li>W. Kwon et al. Efficient Memory Management for Large Language Model Serving with PagedAttention. SOSP 2023.</li>
+<li>A. Agrawal et al. Taming Throughput-Latency Tradeoff in LLM Inference with Sarathi-Serve. OSDI 2024.</li>
+<li>A. Angelopoulos, S. Bates. Conformal Prediction: A Gentle Introduction. Foundations and Trends in ML, 2023.</li>
+<li>P. Patel et al. Splitwise: Efficient Generative LLM Inference Using Phase Splitting. ISCA 2024.</li>
+<li>I. Gibbs, E. Cand&egrave;s. Adaptive Conformal Inference Under Distribution Shift. NeurIPS 2021.</li>
+<li>J. M. Moore. An n Job, One Machine Sequencing Algorithm for Minimizing the Number of Late Jobs. Management Science, 1968.</li>
+<li>Y. Zhong et al. DistServe: Disaggregating Prefill and Decoding for Goodput-optimized LLM Serving. OSDI 2024.</li>
+<li>G.-I. Yu et al. Orca: A Distributed Serving System for Transformer-Based Generative Models. OSDI 2022.</li>
+</ol>
+</body>
+</html>

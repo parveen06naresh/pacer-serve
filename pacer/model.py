@@ -41,6 +41,10 @@ PRESETS = {
     "tiny": ModelConfig(),
     # ~0.5B-class shape for profiling closer to deployment regimes.
     "small": ModelConfig(d_model=1536, n_layers=16, n_heads=12, n_kv_heads=4, ffn_dim=4096),
+    # Character-level model trained on TinyShakespeare by scripts/train_char.py (a real
+    # trained checkpoint to serve, since this environment cannot download pretrained weights).
+    "shakespeare": ModelConfig(vocab_size=65, d_model=384, n_layers=6, n_heads=6, n_kv_heads=2,
+                               ffn_dim=1024, max_seq_len=2048),
     # Llama-3-8B shape, used for analytic roofline projections (not instantiated on CPU).
     "llama3-8b": ModelConfig(vocab_size=128256, d_model=4096, n_layers=32, n_heads=32,
                              n_kv_heads=8, ffn_dim=14336, rope_theta=500000.0, max_seq_len=8192),
@@ -219,6 +223,27 @@ class Transformer(nn.Module):
         for layer, kc, vc in zip(self.layers, k_caches, v_caches):
             x = layer(x, inp, kc, vc, cos, sin)
         return self.lm_head(self.norm(x[inp.logits_idx]))
+
+    def forward_train(self, ids: torch.Tensor) -> torch.Tensor:
+        """Batched causal forward for training. ids: [B, T] -> logits [B, T, vocab]."""
+        cfg = self.cfg
+        B, T = ids.shape
+        x = self.embed(ids)
+        cos, sin = self.rope(x.device, x.dtype)
+        c, s = cos[:T], sin[:T]
+        for layer in self.layers:
+            h = layer.attn_norm(x)
+            a = layer.attn
+            q = apply_rope(a.wq(h).view(B * T, cfg.n_heads, -1), c.repeat(B, 1), s.repeat(B, 1))
+            k = apply_rope(a.wk(h).view(B * T, cfg.n_kv_heads, -1), c.repeat(B, 1), s.repeat(B, 1))
+            q = q.view(B, T, cfg.n_heads, -1).transpose(1, 2)
+            k = k.view(B, T, cfg.n_kv_heads, -1).transpose(1, 2)
+            v = a.wv(h).view(B, T, cfg.n_kv_heads, -1).transpose(1, 2)
+            o = F.scaled_dot_product_attention(q, k, v, is_causal=True, enable_gqa=True)
+            x = x + a.wo(o.transpose(1, 2).reshape(B, T, -1))
+            h = layer.ffn_norm(x)
+            x = x + layer.w2(F.silu(layer.w1(h)) * layer.w3(h))
+        return self.lm_head(self.norm(x))
 
     @torch.inference_mode()
     def forward_dense(self, ids: torch.Tensor) -> torch.Tensor:

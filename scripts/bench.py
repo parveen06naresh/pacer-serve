@@ -55,8 +55,8 @@ class Hog:
     job, thermal throttling, or a shared-GPU tenant). It stalls the engine's parallel
     regions, so even a fraction of one core costs far more than its share."""
 
-    def __init__(self, window, duty: float):
-        self.window, self.duty, self.proc = window, duty, None
+    def __init__(self, window, duty: float, device: str = "cpu"):
+        self.window, self.duty, self.device, self.proc = window, duty, device, None
 
     def __call__(self, now: float):
         inside = self.window[0] <= now < self.window[1]
@@ -64,8 +64,15 @@ class Hog:
             import subprocess
             import sys
             d = self.duty
-            code = ("import time\nwhile True:\n    t = time.perf_counter()\n"
-                    f"    while time.perf_counter() - t < {d} * 0.004: pass\n    time.sleep({1 - d} * 0.004)")
+            if self.device.startswith("cuda"):
+                # A co-tenant on the same GPU: matmul bursts for `duty` of every 20 ms.
+                code = ("import time, torch\na = torch.randn(4096, 4096, device='cuda', dtype=torch.float16)\n"
+                        "while True:\n    t = time.perf_counter()\n"
+                        f"    while time.perf_counter() - t < {d} * 0.02:\n        a @ a; torch.cuda.synchronize()\n"
+                        f"    time.sleep({1 - d} * 0.02)")
+            else:
+                code = ("import time\nwhile True:\n    t = time.perf_counter()\n"
+                        f"    while time.perf_counter() - t < {d} * 0.004: pass\n    time.sleep({1 - d} * 0.004)")
             self.proc = subprocess.Popen([sys.executable, "-c", code])
         elif not inside and self.proc is not None:
             self.stop()
@@ -93,6 +100,9 @@ def main():
     ap.add_argument("--noise", type=float, default=0.0, help="simulator lognormal jitter")
     ap.add_argument("--preset", default="tiny")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--dtype", default="float32", choices=["float32", "float16", "bfloat16"])
+    ap.add_argument("--len-scale", type=float, default=1.0, help="multiply synthetic prompt/output lengths (GPU runs)")
+    ap.add_argument("--latency-model", default="results/latency_model.json")
     ap.add_argument("--trace", default="synthetic", choices=["synthetic", "azure-conv", "azure-code"])
     ap.add_argument("--drift", type=float, nargs=3, metavar=("START", "END", "FACTOR"), default=None,
                     help="sim: steps between START and END (fractions of the trace span) run FACTOR x slower")
@@ -104,14 +114,14 @@ def main():
     args = ap.parse_args()
 
     slo = SLO(ttft=args.ttft, tpot=args.tpot)
-    lat = LinearModel.load("results/latency_model.json")
+    lat = LinearModel.load(args.latency_model)
     if args.sim_model.endswith(".pkl"):
         with open(args.sim_model, "rb") as f:
             sim_lat = pickle.load(f)
     else:
         sim_lat = LinearModel.load(args.sim_model)
 
-    model = build_model(args.preset, device=args.device) if args.mode == "real" else None
+    model = build_model(args.preset, device=args.device, dtype=getattr(torch, args.dtype)) if args.mode == "real" else None
     executor = None
     out_path = Path(args.out or f"results/bench_{args.mode}{args.tag}.jsonl")
     out_path.parent.mkdir(exist_ok=True)
@@ -120,7 +130,10 @@ def main():
             for rate in args.rates:
                 vocab = model.cfg.vocab_size if model else None
                 if args.trace == "synthetic":
-                    spec = WorkloadSpec(rate=rate, num_requests=args.num_requests, burstiness=args.burstiness, seed=seed)
+                    k = args.len_scale
+                    spec = WorkloadSpec(rate=rate, num_requests=args.num_requests, burstiness=args.burstiness, seed=seed,
+                                        prompt_median=int(192 * k), prompt_max=int(1536 * k),
+                                        output_median=int(48 * k), output_max=int(192 * k))
                     trace = generate(spec, vocab_size=vocab)
                 else:
                     trace = from_azure(args.trace.split("-")[1], rate, args.num_requests, window=seed,
@@ -146,7 +159,7 @@ def main():
                             slow = lambda now, a=a, b=b, k=k: k if a <= now < b else 1.0  # noqa: E731
                         ex = SimExecutor(sim_lat, bm, noise=args.noise, seed=seed, slowdown=slow)
                     sched = make()
-                    hog = Hog(window, args.hog[2]) if (args.hog and args.mode == "real") else None
+                    hog = Hog(window, args.hog[2], args.device) if (args.hog and args.mode == "real") else None
                     try:
                         steps = serve(reqs, sched, ex, bm, on_time=hog)
                     finally:

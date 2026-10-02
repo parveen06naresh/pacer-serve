@@ -12,11 +12,10 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from pacer.costmodel import (GBDTModel, HybridModel, LinearModel, RooflineModel,
-                             conformal_ratio, featurize_many)
+from pacer.costmodel import GBDTModel, HybridModel, LinearModel, RooflineModel, conformal_ratio, featurize_many
 from pacer.engine import BlockManager, RealExecutor
 from pacer.model import PRESETS, build_model
-from pacer.profiler import measure_roofline, profile_engine
+from pacer.profiler import measure_roofline, profile_engine, sample_shape
 
 
 def apes(y, p):
@@ -27,8 +26,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--preset", default="tiny")
     ap.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
+    ap.add_argument("--dtype", default="float32", choices=["float32", "float16", "bfloat16"])
     ap.add_argument("--shapes", type=int, default=600)
     ap.add_argument("--out", default="results")
+    ap.add_argument("--max-ctx", type=int, default=1600)
     ap.add_argument("--refit", action="store_true", help="reuse results/profile.pkl instead of profiling")
     args = ap.parse_args()
     out = Path(args.out)
@@ -41,9 +42,10 @@ def main():
     else:
         hw = measure_roofline(args.device)
         print(f"roofline: {hw['peak_flops']/1e9:.0f} GFLOP/s, {hw['bandwidth']/1e9:.1f} GB/s")
-        model = build_model(args.preset, device=args.device)
+        model = build_model(args.preset, device=args.device, dtype=getattr(torch, args.dtype))
         ex = RealExecutor(model, BlockManager(num_blocks=8192, block_size=16), device=args.device)
-        shapes, y = profile_engine(ex, args.shapes, seed=0)
+        shapes, y = profile_engine(ex, args.shapes, seed=0,
+                                   shape_sampler=lambda rng: sample_shape(rng, max_ctx=args.max_ctx))
         with open(out / "profile.pkl", "wb") as f:
             pickle.dump({"shapes": shapes, "latency": y, "hw": hw, "preset": args.preset, "device": args.device}, f)
     X = featurize_many(shapes)

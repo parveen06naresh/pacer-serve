@@ -1,0 +1,264 @@
+<title>Pacer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: an instrument readout. One wide trace up top, then a narrow reading column with data panels. */
+:root {
+  --ground: #edf0f3; --panel: #f8f9fb; --ink: #15202a; --muted: #5a6876; --rule: #cfd6dd;
+  --accent: #2b55d9; --bound: #c47a08; --good: #0b7d5f; --bad: #c03d2b; --faint: #9aa7b3;
+  --display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --ground: #0e1419; --panel: #151d24; --ink: #e3e9ef; --muted: #93a1ae; --rule: #2a3540;
+  --accent: #7d9dff; --bound: #f0b04a; --good: #3fc49b; --bad: #f07a68; --faint: #4f5d6a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --ground: #0e1419; --panel: #151d24; --ink: #e3e9ef; --muted: #93a1ae; --rule: #2a3540;
+  --accent: #7d9dff; --bound: #f0b04a; --good: #3fc49b; --bad: #f07a68; --faint: #4f5d6a; color-scheme: dark }
+body { background: var(--ground); color: var(--ink); font: 400 16px/1.6 var(--body); }
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: 20px; padding-block: 40px 72px; display: grid; gap: 56px; }
+.wrap > * { min-width: 0; }
+.col { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -0.01em; }
+h1 { font-size: clamp(44px, 8vw, 84px); font-weight: 700; line-height: 0.95; }
+h2 { font-size: clamp(24px, 3.4vw, 32px); font-weight: 700; line-height: 1.15; }
+h3 { font-size: 18px; font-weight: 500; }
+p { margin: 0; }
+.eyebrow { font: 500 12px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.lede { font-size: clamp(18px, 2.2vw, 21px); line-height: 1.5; max-width: 40ch; }
+.stack { display: grid; gap: 14px; }
+.hero { display: grid; gap: 22px; }
+.readouts { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(210px, 100%), 1fr)); gap: 1px; background: var(--rule); border: 1px solid var(--rule); }
+.readout { background: var(--panel); padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+.readout b { font: 500 34px/1 var(--display); font-variant-numeric: tabular-nums; }
+.readout b small { font-size: 16px; color: var(--muted); font-weight: 500; }
+.readout span { font-size: 14px; color: var(--muted); line-height: 1.45; }
+.scope { background: var(--panel); border: 1px solid var(--rule); padding: 18px 18px 12px; display: grid; gap: 12px; min-width: 0; }
+.scope-head { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: baseline; justify-content: space-between; }
+.toggles { display: flex; flex-wrap: wrap; gap: 8px; }
+.toggles button { font: 500 13px/1 var(--mono); padding: 8px 11px; border: 1px solid var(--rule); background: transparent; color: var(--muted); cursor: pointer; border-radius: 3px; display: inline-flex; gap: 7px; align-items: center; }
+.toggles button i { width: 10px; height: 10px; border-radius: 50%; background: var(--c); display: inline-block; }
+.toggles button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); }
+.toggles button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+svg text { font-family: var(--mono); font-size: 11px; fill: var(--muted); }
+.chart-box { overflow-x: auto; }
+.chart-box svg { display: block; width: 100%; min-width: 520px; height: auto; }
+.caption { font-size: 13.5px; color: var(--muted); line-height: 1.5; }
+.loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr)); gap: 20px 28px; }
+.loop div { display: grid; gap: 6px; align-content: start; border-top: 2px solid var(--ink); padding-top: 12px; }
+.loop .n { font: 500 12px var(--mono); color: var(--accent); }
+.loop p { font-size: 15px; color: var(--muted); }
+.formula { font: 400 14px/1.6 var(--mono); background: var(--panel); border: 1px solid var(--rule); padding: 12px 14px; overflow-x: auto; white-space: pre; }
+.bars { display: grid; gap: 8px; }
+.bar { display: grid; grid-template-columns: minmax(150px, 220px) 1fr 52px; gap: 12px; align-items: center; font-size: 14px; }
+.bar .track { height: 14px; background: color-mix(in srgb, var(--rule) 55%, transparent); position: relative; }
+.bar .fill { position: absolute; inset: 0 auto 0 0; background: var(--faint); }
+.bar.hi .fill { background: var(--accent); }
+.bar.hi { font-weight: 600; }
+.bar .v { font: 500 13px var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 36px 48px; }
+.panels > section { display: grid; gap: 14px; align-content: start; min-width: 0; }
+.table-box { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: right; padding: 7px 10px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font: 500 11.5px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+tr.hi td { font-weight: 600; }
+.neg { display: grid; gap: 12px; }
+.neg p + p { margin-top: 2px; }
+.list { display: grid; gap: 10px; padding: 0; margin: 0; list-style: none; }
+.list li { padding-left: 18px; position: relative; }
+.list li::before { content: ""; position: absolute; left: 0; top: 0.68em; width: 8px; height: 2px; background: var(--bound); }
+a { color: var(--accent); text-underline-offset: 3px; }
+.links { display: flex; flex-wrap: wrap; gap: 10px 22px; font: 500 14px var(--mono); }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--rule); padding-top: 18px; }
+code { font: 13.5px var(--mono); }
+@media (max-width: 520px) { .bar { grid-template-columns: 1fr 44px; } .bar .track { grid-column: 1 / -1; grid-row: 2; } }
+@media (prefers-reduced-motion: no-preference) { .series { transition: opacity .25s, stroke-width .25s; } }
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">LLM inference scheduling · built from scratch</div>
+    <h1>Pacer</h1>
+    <p class="lede">An LLM server whose scheduler knows how sure it is. It predicts every step's latency, bounds the prediction with an online conformal guarantee, and keeps users inside their latency targets when the hardware slows down mid-run.</p>
+    <div class="readouts">
+      <div class="readout"><b>85%</b><span>of in-flight requests within SLO during a real noisy-neighbour slowdown. Best standard scheduler: 49%.</span></div>
+      <div class="readout"><b>8.5–10.4<small>%</small></b><span>steps over the latency bound on real hardware, against a 10% target. The guarantee held.</span></div>
+      <div class="readout"><b>+49%</b><span>capacity at 90% SLO attainment over the best fixed chunked-prefill budget (7.00 vs 4.71 req/s).</span></div>
+      <div class="readout"><b>0.94</b><span>worst-case share of the best policy's capacity across six workloads. Best fixed budget: 0.70.</span></div>
+    </div>
+  </header>
+
+  <section class="scope" aria-labelledby="trace-h">
+    <div class="scope-head">
+      <div class="stack" style="gap:4px">
+        <div class="eyebrow">Step latency trace · p90 per second</div>
+        <h3 id="trace-h">The hardware gets 1.5× slower at second 26</h3>
+      </div>
+      <div class="toggles" role="group" aria-label="Highlight a scheduler">
+        <button id="t-online" data-k="pacer-online" style="--c:var(--good)" aria-pressed="true"><i></i>Pacer, online</button>
+        <button id="t-offline" data-k="pacer" style="--c:var(--bound)" aria-pressed="false"><i></i>Pacer, offline</button>
+        <button id="t-static" data-k="chunked-edf-128" style="--c:var(--bad)" aria-pressed="false"><i></i>Fixed budget 128</button>
+      </div>
+    </div>
+    <div class="chart-box"><svg id="chart" viewBox="0 0 960 330" role="img" aria-label="Per-second p90 step latency for three schedulers through a slowdown"></svg></div>
+    <p class="caption" id="cap"></p>
+  </section>
+
+  <section class="stack">
+    <div class="eyebrow">The problem</div>
+    <h2>Every batch is a trade between two kinds of user</h2>
+    <div class="col stack">
+      <p>Continuous batching runs prompt processing (prefill) and token generation (decode) in the same GPU step. Each prompt token you add makes the step slower for everyone already generating. Each one you hold back delays somebody's first token. vLLM and TensorRT-LLM settle this with a fixed token budget per step and a hand-tuned safety margin.</p>
+      <p>The right budget depends on the model, the accelerator, the SLO and the traffic, and it moves. A roofline analysis of Llama-3-8B puts the free prefill headroom at about 200 tokens on an A100 and about 600 on an L4. At run time, co-tenants and throttling change step latency by tens of percent. A scheduler that packs steps up to its latency prediction is exactly the scheduler that breaks when the prediction goes stale.</p>
+    </div>
+  </section>
+
+  <section class="stack">
+    <div class="eyebrow">How a scheduling step works</div>
+    <h2>Predict, bound, size, order. Every few milliseconds.</h2>
+    <div class="loop">
+      <div><span class="n">1 · predict</span><h3>Physics-shaped latency model</h3><p>Seven features with physical units: GEMM tokens, prefill attention FLOPs, decode KV bytes, padding, per-sequence cost. Non-negative least squares. 7.3% error, and 4.4% on step sizes it never saw.</p></div>
+      <div><span class="n">2 · bound</span><h3>Online conformal risk control</h3><p>After each step it records actual ÷ predicted and updates its bound with adaptive conformal inference. The long-run miss rate converges to 10% for any sequence of ratios, drift included.</p></div>
+      <div><span class="n">3 · size</span><h3>Model-predictive budget</h3><p>Binary search for the largest prompt chunk whose bounded latency still meets the time-per-token SLO. A dot product per probe, microseconds per decision.</p></div>
+      <div><span class="n">4 · order</span><h3>Moore-Hodgson queueing</h3><p>The exact algorithm for minimising missed deadlines on one machine decides which prompts to serve first. Hopeless prompts wait, so savable ones make it.</p></div>
+    </div>
+    <div class="formula">bound:   α(t+1) = α(t) + γ · (α − 1[actual/predicted &gt; q(t)])
+budget:  max c  such that  q(t) · predicted_latency(decodes + chunks(c)) ≤ SLO_tpot</div>
+  </section>
+
+  <div class="panels">
+    <section>
+      <div class="eyebrow">Real engine · steady state</div>
+      <h2>Capacity at 90% SLO attainment</h2>
+      <div class="bars" id="cap-bars"></div>
+      <p class="caption">Requests per second a 4-core CPU sustains with at least 90% of requests meeting TTFT 2 s and TPOT 100 ms. One run each; an earlier run measured the fixed budget at 5.36.</p>
+    </section>
+    <section>
+      <div class="eyebrow">Simulator · six workloads</div>
+      <h2>Worst case across workloads</h2>
+      <div class="bars" id="rob-bars"></div>
+      <p class="caption">Capacity as a share of the best policy, minimum over Poisson at three SLOs, bursty arrivals and the Azure chat and code production traces. The simulator matches the real engine within 3.3 points on average.</p>
+    </section>
+  </div>
+
+  <div class="panels">
+    <section>
+      <div class="eyebrow">Real engine · noisy neighbour</div>
+      <h2>Requests within SLO during the slowdown</h2>
+      <div class="table-box"><table>
+        <thead><tr><th>Scheduler</th><th>In drift</th><th>Overall</th></tr></thead>
+        <tbody>
+          <tr><td>Fixed budget 128</td><td>47.7%</td><td>71.5%</td></tr>
+          <tr><td>Fixed 128 + deadline order</td><td>48.6%</td><td>72.0%</td></tr>
+          <tr><td>Pacer, offline calibration</td><td>37.6%</td><td>66.0%</td></tr>
+          <tr class="hi"><td>Pacer, online calibration</td><td>85.3%</td><td>92.0%</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <section>
+      <div class="eyebrow">600 profiled steps</div>
+      <h2>Latency model error</h2>
+      <div class="table-box"><table>
+        <thead><tr><th>Model</th><th>Random split</th><th>Extrapolating</th></tr></thead>
+        <tbody>
+          <tr><td>Roofline + 2 scalars</td><td>50.2%</td><td>81.0%</td></tr>
+          <tr><td>Gradient-boosted trees</td><td>17.9%</td><td>50.8%</td></tr>
+          <tr><td>Linear + tree residual</td><td>9.9%</td><td>5.0%</td></tr>
+          <tr class="hi"><td>Physics-shaped linear</td><td>7.3%</td><td>4.4%</td></tr>
+        </tbody>
+      </table></div>
+      <p class="caption">Mean absolute percentage error. Extrapolation trains on steps of at most 512 tokens and tests on larger ones.</p>
+    </section>
+  </div>
+
+  <section class="stack neg">
+    <div class="eyebrow">What didn't work</div>
+    <h2>A clever scheduler without calibration is a liability</h2>
+    <div class="col stack">
+      <p>Pacer with offline calibration had the best steady-state capacity and the worst result under drift: 37.6%, below every static baseline. It fills each step right up to the bound it believes, so once the machine slows, every step overshoots. Static budgets survive by accident, because they leave slack nobody planned. Online calibration is what turns the model-predictive idea from fragile into robust.</p>
+      <p>Spending banked time-per-token slack on larger prompt chunks never helped across six scenarios and sometimes hurt, so it is off by default and reported as a negative result.</p>
+    </div>
+  </section>
+
+  <section class="stack">
+    <div class="eyebrow">Scope</div>
+    <h2>What was measured, and what wasn't</h2>
+    <ul class="list col">
+      <li>Measured on a 4-core cloud CPU with a 63M-parameter Llama-architecture model. The prefill and decode cost structure matches GPUs; absolute numbers do not transfer.</li>
+      <li>GPU figures are roofline projections. A Colab notebook reruns the profile and the benchmark on an NVIDIA T4 with one command.</li>
+      <li>The guarantee is per step. Its effect on per-request SLOs is measured, not proven.</li>
+      <li>The paged engine is tested token-exact against a dense full-recompute reference, under irregular chunking and mixed batches.</li>
+    </ul>
+  </section>
+
+  <section class="stack">
+    <div class="eyebrow">Read more</div>
+    <div class="links"><a href="pacer.pdf">Paper (PDF, 5 pages)</a></div>
+  </section>
+
+  <footer>Built by Crown. Engine, scheduler, simulator, benchmarks and paper written from scratch in Python and PyTorch. Workload traces: Azure LLM inference traces 2023 (public).</footer>
+</div>
+
+<script>
+const D = {"window":[26.02,60.71],"slo":0.1,"factor":1.5,"runs":{"chunked-edf-128":{"p90":[41.4,20.3,10.4,9.5,12.4,14.2,50.0,30.9,20.1,44.3,48.1,15.3,54.5,56.4,52.7,63.5,70.0,66.5,56.9,45.7,17.5,13.8,29.2,17.6,29.9,14.8,18.0,18.0,19.0,77.2,89.9,43.2,79.0,88.0,104.1,113.8,126.3,128.7,125.3,128.4,115.4,105.8,126.9,126.8,122.6,124.8,143.5,142.2,123.9,133.1,116.6,127.9,114.6,117.5,112.1,116.3,113.4,108.9,117.2,126.3,123.8,87.2,81.3,80.2,87.8,79.1,61.9,44.5,33.9,18.8,14.7,44.1,51.3,18.7,19.8,11.8,10.5,11.9,32.9,38.7,16.0,12.8,21.4,12.0,11.2,9.9,58.1,17.7],"over":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.273,0.889,0.778,0.889,1.0,0.889,0.778,0.4,0.889,0.889,0.889,0.778,0.875,0.875,0.889,0.889,1.0,0.4,0.778,0.7,0.455,0.889,0.667,0.7,0.889,0.889,0.778,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bw":1.0,"met_drift":0.235,"met_all":0.687,"over_drift":0.398},"pacer":{"p90":[15.2,17.5,10.3,9.5,11.3,14.4,69.2,18.6,15.8,23.0,30.9,14.7,95.3,57.1,47.6,93.1,88.7,65.6,35.9,24.4,16.9,11.0,12.8,14.2,15.2,14.0,16.2,17.9,18.9,117.5,119.8,44.0,84.8,150.2,142.2,143.0,148.7,148.6,143.7,145.5,154.4,146.2,137.8,154.8,143.8,143.8,137.0,142.6,148.0,124.1,150.3,101.6,130.1,136.8,131.1,138.3,138.1,142.4,142.4,156.4,138.4,91.2,98.1,100.4,87.3,84.0,29.3,15.2,15.5,17.0,14.4,49.4,79.4,17.9,17.2,11.3,10.3,11.5,17.0,20.1,15.6,12.7,22.7,12.1,11.0,10.3,94.3,14.2],"over":[0.0,0.016,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.045,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.018,0.0,0.158,0.176,0.036,0.087,0.875,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,1.0,0.75,0.875,0.889,0.667,0.625,0.25,0.778,0.154,0.6,0.5,0.455,0.6,0.75,0.875,0.333,1.0,0.667,0.0,0.0,0.182,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.027,0.028,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.062,0.0],"bw":1.0,"met_drift":0.367,"met_all":0.74,"over_drift":0.397},"pacer-online":{"p90":[15.2,17.7,10.4,9.5,11.5,14.4,69.6,17.8,15.6,24.2,37.2,14.7,93.4,59.4,42.3,94.5,90.5,70.3,33.6,24.2,17.0,11.0,13.2,13.5,15.0,14.2,16.4,17.9,19.1,85.4,96.4,44.3,91.2,100.2,100.8,96.9,99.5,98.6,103.0,100.2,94.6,107.6,92.4,97.5,93.7,92.2,100.8,99.3,89.4,95.5,96.3,93.9,96.5,96.3,105.3,95.8,100.1,100.1,102.0,96.2,93.8,67.2,65.0,69.1,69.1,67.1,73.7,67.2,49.6,20.5,15.1,56.2,81.8,18.6,16.5,11.2,10.3,11.9,16.8,21.0,15.5,12.6,25.2,12.2,11.0,10.4,82.2,13.7],"over":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.045,0.0,0.0,0.0,0.0,0.0,0.0,0.021,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.062,0.0,0.0,0.1,0.182,0.0,0.091,0.091,0.182,0.182,0.0,0.273,0.091,0.091,0.083,0.0,0.182,0.091,0.083,0.083,0.0,0.0,0.091,0.0,0.3,0.0,0.182,0.182,0.273,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.012,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"bw":1.0,"met_drift":0.96,"met_all":0.963,"over_drift":0.06}}};
+const COLORS = { "pacer-online": "--good", "pacer": "--bound", "chunked-edf-128": "--bad" };
+const NAMES = { "pacer-online": "Pacer, online", "pacer": "Pacer, offline", "chunked-edf-128": "Fixed budget 128" };
+const svg = document.getElementById("chart");
+const W = 960, H = 330, L = 52, R = 16, T = 18, B = 40;
+const n = D.runs["pacer-online"].p90.length;
+const ymax = 160;
+const x = s => L + (s / n) * (W - L - R);
+const y = v => T + (1 - Math.min(v, ymax) / ymax) * (H - T - B);
+const NS = "http://www.w3.org/2000/svg";
+function el(tag, attrs, text) { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; svg.appendChild(e); return e; }
+function draw(active) {
+  svg.innerHTML = "";
+  const [a, b] = D.window;
+  el("rect", { x: x(a), y: T, width: x(b) - x(a), height: H - T - B, fill: "var(--bound)", "fill-opacity": 0.09 });
+  el("text", { x: x(a) + 8, y: T + 14 }, "noisy neighbour, steps 1.5× slower");
+  for (const v of [0, 40, 80, 120, 160]) {
+    el("line", { x1: L, x2: W - R, y1: y(v), y2: y(v), stroke: "var(--rule)", "stroke-width": 1 });
+    el("text", { x: L - 8, y: y(v) + 4, "text-anchor": "end" }, v);
+  }
+  for (let s = 0; s <= n; s += 10) el("text", { x: x(s), y: H - B + 18, "text-anchor": "middle" }, s + "s");
+  el("text", { x: 12, y: T + (H - T - B) / 2, transform: `rotate(-90 12 ${T + (H - T - B) / 2})`, "text-anchor": "middle" }, "ms per step");
+  el("line", { x1: L, x2: W - R, y1: y(D.slo * 1000), y2: y(D.slo * 1000), stroke: "var(--ink)", "stroke-width": 1.5, "stroke-dasharray": "6 5" });
+  el("text", { x: W - R - 4, y: y(D.slo * 1000) - 7, "text-anchor": "end", style: "fill:var(--ink)" }, "TPOT SLO 100 ms");
+  const order = Object.keys(D.runs).filter(k => k !== active).concat([active]);
+  for (const k of order) {
+    const pts = D.runs[k].p90.map((v, i) => v == null ? null : [x(i + 0.5), y(v)]);
+    let d = "", pen = false;
+    for (const p of pts) { if (!p) { pen = false; continue; } d += (pen ? "L" : "M") + p[0].toFixed(1) + " " + p[1].toFixed(1); pen = true; }
+    el("path", { d, class: "series", fill: "none", stroke: `var(${COLORS[k]})`, "stroke-width": k === active ? 2.6 : 1.4, "stroke-opacity": k === active ? 1 : 0.35, "stroke-linejoin": "round" });
+  }
+  const r = D.runs[active];
+  document.getElementById("cap").textContent =
+    `${NAMES[active]}: ${Math.round(r.over_drift * 100)}% of steps ran over the SLO during the slowdown, and ${Math.round(r.met_drift * 100)}% of requests finishing in that window met both SLOs. One simulated run at 4 req/s with 8% step jitter, using the latency model profiled on the real engine.`;
+}
+let active = "pacer-online";
+try { const s = localStorage.getItem("pacer-trace"); if (s && D.runs[s]) active = s; } catch (e) {}
+document.querySelectorAll(".toggles button").forEach(btn => {
+  btn.setAttribute("aria-pressed", btn.dataset.k === active);
+  btn.addEventListener("click", () => {
+    active = btn.dataset.k;
+    document.querySelectorAll(".toggles button").forEach(b2 => b2.setAttribute("aria-pressed", b2 === btn));
+    try { localStorage.setItem("pacer-trace", active); } catch (e) {}
+    draw(active);
+  });
+});
+draw(active);
+
+function bars(id, rows, max, fmt) {
+  const host = document.getElementById(id);
+  for (const [name, v, hi] of rows) {
+    const row = document.createElement("div"); row.className = "bar" + (hi ? " hi" : "");
+    row.innerHTML = `<span></span><div class="track"><div class="fill" style="width:${(v / max * 100).toFixed(1)}%"></div></div><span class="v">${fmt(v)}</span>`;
+    row.firstChild.textContent = name; host.appendChild(row);
+  }
+}
+bars("cap-bars", [["Prefill-first (vLLM v0)", 4.19], ["Fixed budget 128", 4.71], ["Fixed 128 + deadline order", 5.75], ["Pacer, online", 6.00, 1], ["Pacer, offline", 7.00, 1]], 7.0, v => v.toFixed(2));
+bars("rob-bars", [["Prefill-first", 0.00], ["Fixed budget 128", 0.45], ["Fixed 64 + deadline order", 0.62], ["Fixed 128 + deadline order", 0.70], ["Pacer, online", 0.94, 1], ["Pacer, offline", 0.97, 1]], 1.0, v => v.toFixed(2));
+</script>

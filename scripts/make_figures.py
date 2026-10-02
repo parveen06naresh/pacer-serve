@@ -45,7 +45,7 @@ def setup():
 
 
 def load(path):
-    rows = [json.loads(l) for l in open(path)] if Path(path).exists() else []
+    rows = [json.loads(line) for line in open(path)] if Path(path).exists() else []
     return rows
 
 
@@ -242,7 +242,7 @@ def drift_bars_fig():
         return
     fig, ax = plt.subplots(figsize=(8.4, 4.2))
     w = 0.2
-    for j, (p, c, lab) in enumerate(pols):
+    for j, (_p, c, lab) in enumerate(pols):
         xs = np.arange(len(data)) + (j - 1.5) * w
         ys = [v[j] for _, v in data]
         ax.bar(xs, ys, width=w - 0.02, color=c, label=lab)

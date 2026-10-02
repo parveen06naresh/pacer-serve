@@ -27,7 +27,7 @@ class StepShape:
         return sum(n for n, _ in self.prefill) + len(self.decode)
 
     @staticmethod
-    def of(batch: list[tuple[Request, int]]) -> "StepShape":
+    def of(batch: list[tuple[Request, int]]) -> StepShape:
         pre, dec = [], []
         for r, n in batch:
             if r.in_prefill:
@@ -81,10 +81,13 @@ def _apply_progress(batch: list[tuple[Request, int]], new_tokens: list[int | Non
 
 
 class RealExecutor:
-    def __init__(self, model: Transformer, blocks: BlockManager, device: str = "cpu"):
+    def __init__(self, model: Transformer, blocks: BlockManager, device: str = "cpu",
+                 temperature: float = 0.0, seed: int = 0):
         self.model = model
         self.blocks = blocks
         self.device = device
+        self.temperature = temperature  # 0 = greedy (what the exactness tests use)
+        self.gen = torch.Generator(device=device).manual_seed(seed)
         cfg = model.cfg
         dtype = next(model.parameters()).dtype
         shape = (blocks.num_blocks, blocks.block_size, cfg.n_kv_heads, cfg.head_dim)
@@ -127,7 +130,11 @@ class RealExecutor:
         t0 = time.perf_counter()
         inp = self.build_input(batch)
         logits = self.model.forward_step(inp, self.k, self.v)
-        toks = logits.argmax(-1).tolist()
+        if self.temperature > 0:
+            probs = torch.softmax(logits / self.temperature, dim=-1)
+            toks = torch.multinomial(probs, 1, generator=self.gen).squeeze(-1).tolist()
+        else:
+            toks = logits.argmax(-1).tolist()
         self._sync()
         dt = time.perf_counter() - t0
         _apply_progress(batch, toks, now + dt)

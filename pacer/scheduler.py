@@ -58,7 +58,7 @@ class PrefillFirst(Scheduler):
 
 
 class ChunkedFixed(Scheduler):
-    def __init__(self, token_budget: int = 256, edf: "Pacer | None" = None):
+    def __init__(self, token_budget: int = 256, edf: Pacer | None = None):
         self.budget = token_budget
         self.edf = edf  # borrow Pacer's deadline ordering (a stronger baseline)
         self.name = f"chunked-{token_budget}" + ("+EDF" if edf else " (Sarathi)")

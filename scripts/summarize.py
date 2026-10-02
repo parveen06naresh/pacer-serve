@@ -24,7 +24,7 @@ def capacity(rates, att, target=0.9):
 
 
 def table(path: Path) -> dict:
-    rows = [json.loads(l) for l in open(path)]
+    rows = [json.loads(line) for line in open(path)]
     by = defaultdict(lambda: defaultdict(list))
     for r in rows:
         by[r["policy"]][r["rate"]].append(r)
@@ -53,7 +53,7 @@ def main():
     files = [Path(f) for f in sys.argv[1:]] or sorted(Path("results").glob("bench_*.jsonl"))
     summary = {f.stem: table(f) for f in files}
     robustness(summary)
-    with open("results/summary.json", "w") as f:
+    with open(files[0].parent / "summary.json", "w") as f:
         json.dump(summary, f, indent=1)
 
 

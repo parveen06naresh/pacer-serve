@@ -50,8 +50,7 @@ def test_pacer_step_fits_tightest_deadline():
     assert TOY.predict(bigger) > pacer.last_target
 
 
-def test_edf_puts_hopeless_requests_last():
-    bm = BlockManager(4096, 16)
+def test_deadline_ordering_puts_hopeless_requests_last():
     pacer = Pacer(TOY, SLO_)
     old = Request(0, arrival=0.0, prompt_len=200, max_new_tokens=5)       # deadline long gone
     fresh = Request(1, arrival=9.9, prompt_len=200, max_new_tokens=5)
@@ -76,3 +75,13 @@ def test_azure_trace_replay_scales_rate_and_lengths():
     span = reqs[-1].arrival - reqs[0].arrival
     assert abs(200 / span - 4.0) < 1e-6
     assert all(8 <= r.prompt_len <= 1536 and 4 <= r.max_new_tokens <= 192 for r in reqs)
+
+
+def test_moore_hodgson_saves_more_deadlines_than_edf():
+    # A long prompt due first, then three short ones. EDF serves the long one first and
+    # makes two short ones late; Moore-Hodgson gives up the long one and saves all three.
+    long = Request(0, arrival=0.00, prompt_len=1500, max_new_tokens=4)
+    shorts = [Request(i, arrival=0.01 * i, prompt_len=150, max_new_tokens=4) for i in (1, 2, 3)]
+    slo = SLO(ttft=0.4, tpot=0.08)
+    assert Pacer(TOY, slo, order="mh")._prefill_order(0.05, [long, *shorts]) == [*shorts, long]
+    assert Pacer(TOY, slo, order="edf")._prefill_order(0.05, [long, *shorts])[0] is long

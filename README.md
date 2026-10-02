@@ -5,6 +5,11 @@ chunked prefill) whose scheduler predicts every step's latency, wraps that predi
 a distribution-free risk bound that re-calibrates itself online, and orders prompts with
 an exact algorithm for minimising missed deadlines.**
 
+[![CI](https://github.com/parveen06naresh/pacer-serve/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
+[Paper (PDF, 5 pages)](docs/paper/pacer.pdf) ·
+[GPU notebook (Colab, free T4)](notebooks/gpu_benchmark.ipynb) ·
+[Design notes](docs/DESIGN.md)
+
 Headline results (all reproducible from this repo):
 
 * **Under a real noisy neighbour** (a co-located process slowing the engine ~1.5x), Pacer
@@ -223,16 +228,33 @@ code runs unmodified with `--device cuda`.
 * `pacer/scheduler.py`: prefill-first, chunked (Sarathi), chunked+EDF, and Pacer.
 * `pacer/costmodel.py`: roofline, linear, GBDT, hybrid models; offline and online conformal.
 * `pacer/workload.py`: synthetic Poisson/Gamma traffic and Azure production-trace replay.
+* `pacer/cli.py`: `pacer demo | bench | profile | figures | test`.
+* `docs/paper/`: a 5-page write-up with the step-level guarantee (Proposition 1) and its proof.
 * `tests/`: the paged, chunked, mixed-batch engine reproduces a naive full-recompute
   forward pass token-for-token; scheduler invariants; online conformal coverage through a
   step change in hardware speed.
 
+## Try it
+
+```bash
+pip install -e .[dev]
+pacer test                    # 12 tests, including token-exact paged vs dense
+pacer demo                    # serve 8 Shakespeare prompts with a trained model, Pacer scheduling
+```
+
+`pacer demo` uses a small character-level Llama-style model trained on TinyShakespeare
+(`scripts/train_char.py`, saved to `results/shakespeare.pt`), so the engine produces real
+text while you watch TTFT and TPOT per request.
+
+**On a GPU:** open `notebooks/gpu_benchmark.ipynb` in Colab (Runtime > T4 GPU > Run all).
+It profiles the engine on CUDA in FP16, finds the fixed-budget baseline's knee, and runs
+the steady-state and noisy-neighbour benchmarks (`scripts/run_gpu.py`).
+
 ## Reproduce
 
 ```bash
-pip install -r requirements.txt
-export PYTHONPATH=.
-pytest -q                                          # 11 tests
+pip install -e .[dev]
+pytest -q
 python scripts/profile_and_fit.py --shapes 600     # profile engine, fit + calibrate (~30 min CPU)
 ./scripts/run_real.sh                              # real engine: steady state, Azure, noisy neighbour (~50 min)
 ./scripts/run_sim.sh && python scripts/drift_timeline.py
