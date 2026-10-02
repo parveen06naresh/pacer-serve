@@ -1,0 +1,229 @@
+[sim seed=0 rate= 1.0] chunked-edf-64  SLO=100.0%  goodput=0.88/s  TTFT p99=0.75s  TPOT p99=16ms  steps=9218 avg_tok=7
+[sim seed=0 rate= 1.0] chunked-edf-128 SLO=100.0%  goodput=0.88/s  TTFT p99=0.62s  TPOT p99=15ms  steps=9012 avg_tok=7
+[sim seed=0 rate= 1.0] chunked-edf-256 SLO=100.0%  goodput=0.88/s  TTFT p99=0.55s  TPOT p99=15ms  steps=8902 avg_tok=7
+[sim seed=0 rate= 1.0] chunked-edf-512 SLO=100.0%  goodput=0.88/s  TTFT p99=0.54s  TPOT p99=15ms  steps=8853 avg_tok=7
+[sim seed=0 rate= 2.0] chunked-edf-64  SLO=100.0%  goodput=1.74/s  TTFT p99=0.83s  TPOT p99=30ms  steps=6748 avg_tok=9
+[sim seed=0 rate= 2.0] chunked-edf-128 SLO=100.0%  goodput=1.74/s  TTFT p99=0.68s  TPOT p99=33ms  steps=6664 avg_tok=9
+[sim seed=0 rate= 2.0] chunked-edf-256 SLO=100.0%  goodput=1.74/s  TTFT p99=0.60s  TPOT p99=34ms  steps=6607 avg_tok=9
+[sim seed=0 rate= 2.0] chunked-edf-512 SLO=100.0%  goodput=1.74/s  TTFT p99=0.56s  TPOT p99=34ms  steps=6568 avg_tok=9
+[sim seed=0 rate= 3.0] chunked-edf-64  SLO=100.0%  goodput=2.58/s  TTFT p99=1.39s  TPOT p99=45ms  steps=4523 avg_tok=14
+[sim seed=0 rate= 3.0] chunked-edf-128 SLO=100.0%  goodput=2.59/s  TTFT p99=0.83s  TPOT p99=46ms  steps=4587 avg_tok=13
+[sim seed=0 rate= 3.0] chunked-edf-256 SLO=100.0%  goodput=2.59/s  TTFT p99=0.63s  TPOT p99=49ms  steps=4590 avg_tok=13
+[sim seed=0 rate= 3.0] chunked-edf-512 SLO=100.0%  goodput=2.59/s  TTFT p99=0.57s  TPOT p99=45ms  steps=4560 avg_tok=14
+[sim seed=0 rate= 4.0] chunked-edf-64  SLO= 99.5%  goodput=3.39/s  TTFT p99=1.66s  TPOT p99=54ms  steps=2849 avg_tok=22
+[sim seed=0 rate= 4.0] chunked-edf-128 SLO=100.0%  goodput=3.41/s  TTFT p99=1.60s  TPOT p99=79ms  steps=2936 avg_tok=21
+[sim seed=0 rate= 4.0] chunked-edf-256 SLO= 97.5%  goodput=3.33/s  TTFT p99=0.95s  TPOT p99=106ms  steps=2958 avg_tok=21
+[sim seed=0 rate= 4.0] chunked-edf-512 SLO= 97.5%  goodput=3.33/s  TTFT p99=0.74s  TPOT p99=114ms  steps=2934 avg_tok=21
+[sim seed=0 rate= 5.0] chunked-edf-64  SLO= 96.0%  goodput=4.03/s  TTFT p99=8.27s  TPOT p99=56ms  steps=1601 avg_tok=39
+[sim seed=0 rate= 5.0] chunked-edf-128 SLO= 98.0%  goodput=4.13/s  TTFT p99=2.05s  TPOT p99=99ms  steps=1623 avg_tok=38
+[sim seed=0 rate= 5.0] chunked-edf-256 SLO= 85.0%  goodput=3.58/s  TTFT p99=1.63s  TPOT p99=149ms  steps=1688 avg_tok=37
+[sim seed=0 rate= 5.0] chunked-edf-512 SLO= 84.0%  goodput=3.54/s  TTFT p99=1.08s  TPOT p99=162ms  steps=1665 avg_tok=37
+[sim seed=0 rate= 6.0] chunked-edf-64  SLO= 92.0%  goodput=4.17/s  TTFT p99=29.91s  TPOT p99=54ms  steps=1130 avg_tok=55
+[sim seed=0 rate= 6.0] chunked-edf-128 SLO= 88.0%  goodput=4.13/s  TTFT p99=28.48s  TPOT p99=112ms  steps=750 avg_tok=82
+[sim seed=0 rate= 6.0] chunked-edf-256 SLO= 23.5%  goodput=1.12/s  TTFT p99=2.13s  TPOT p99=177ms  steps=604 avg_tok=102
+[sim seed=0 rate= 6.0] chunked-edf-512 SLO= 22.5%  goodput=1.08/s  TTFT p99=1.37s  TPOT p99=202ms  steps=582 avg_tok=106
+[sim seed=0 rate= 7.0] chunked-edf-64  SLO= 87.5%  goodput=4.02/s  TTFT p99=28.16s  TPOT p99=49ms  steps=1180 avg_tok=52
+[sim seed=0 rate= 7.0] chunked-edf-128 SLO= 92.0%  goodput=4.53/s  TTFT p99=27.16s  TPOT p99=88ms  steps=727 avg_tok=85
+[sim seed=0 rate= 7.0] chunked-edf-256 SLO=  6.0%  goodput=0.28/s  TTFT p99=25.84s  TPOT p99=192ms  steps=481 avg_tok=129
+[sim seed=0 rate= 7.0] chunked-edf-512 SLO=  5.5%  goodput=0.26/s  TTFT p99=2.32s  TPOT p99=313ms  steps=410 avg_tok=151
+[sim seed=0 rate= 8.0] chunked-edf-64  SLO= 78.5%  goodput=3.59/s  TTFT p99=26.66s  TPOT p99=53ms  steps=1165 avg_tok=53
+[sim seed=0 rate= 8.0] chunked-edf-128 SLO= 82.5%  goodput=4.06/s  TTFT p99=25.27s  TPOT p99=87ms  steps=704 avg_tok=88
+[sim seed=0 rate= 8.0] chunked-edf-256 SLO=  5.5%  goodput=0.26/s  TTFT p99=23.94s  TPOT p99=191ms  steps=476 avg_tok=130
+[sim seed=0 rate= 8.0] chunked-edf-512 SLO=  4.0%  goodput=0.19/s  TTFT p99=11.52s  TPOT p99=343ms  steps=368 avg_tok=168
+[sim seed=0 rate= 9.0] chunked-edf-64  SLO= 67.5%  goodput=3.12/s  TTFT p99=25.83s  TPOT p99=51ms  steps=1156 avg_tok=53
+[sim seed=0 rate= 9.0] chunked-edf-128 SLO= 72.0%  goodput=3.59/s  TTFT p99=24.16s  TPOT p99=92ms  steps=692 avg_tok=89
+[sim seed=0 rate= 9.0] chunked-edf-256 SLO=  5.0%  goodput=0.25/s  TTFT p99=22.23s  TPOT p99=187ms  steps=462 avg_tok=134
+[sim seed=0 rate= 9.0] chunked-edf-512 SLO=  3.5%  goodput=0.16/s  TTFT p99=13.67s  TPOT p99=364ms  steps=349 avg_tok=177
+[sim seed=1 rate= 1.0] chunked-edf-64  SLO=100.0%  goodput=0.95/s  TTFT p99=0.50s  TPOT p99=17ms  steps=8932 avg_tok=6
+[sim seed=1 rate= 1.0] chunked-edf-128 SLO=100.0%  goodput=0.95/s  TTFT p99=0.41s  TPOT p99=17ms  steps=8747 avg_tok=6
+[sim seed=1 rate= 1.0] chunked-edf-256 SLO=100.0%  goodput=0.95/s  TTFT p99=0.37s  TPOT p99=16ms  steps=8654 avg_tok=6
+[sim seed=1 rate= 1.0] chunked-edf-512 SLO=100.0%  goodput=0.95/s  TTFT p99=0.36s  TPOT p99=17ms  steps=8612 avg_tok=6
+[sim seed=1 rate= 2.0] chunked-edf-64  SLO=100.0%  goodput=1.90/s  TTFT p99=0.58s  TPOT p99=25ms  steps=6122 avg_tok=9
+[sim seed=1 rate= 2.0] chunked-edf-128 SLO=100.0%  goodput=1.90/s  TTFT p99=0.44s  TPOT p99=26ms  steps=6082 avg_tok=9
+[sim seed=1 rate= 2.0] chunked-edf-256 SLO=100.0%  goodput=1.90/s  TTFT p99=0.39s  TPOT p99=26ms  steps=6050 avg_tok=9
+[sim seed=1 rate= 2.0] chunked-edf-512 SLO=100.0%  goodput=1.90/s  TTFT p99=0.38s  TPOT p99=26ms  steps=6027 avg_tok=9
+[sim seed=1 rate= 3.0] chunked-edf-64  SLO=100.0%  goodput=2.84/s  TTFT p99=0.59s  TPOT p99=32ms  steps=4060 avg_tok=14
+[sim seed=1 rate= 3.0] chunked-edf-128 SLO=100.0%  goodput=2.84/s  TTFT p99=0.45s  TPOT p99=29ms  steps=4113 avg_tok=14
+[sim seed=1 rate= 3.0] chunked-edf-256 SLO=100.0%  goodput=2.84/s  TTFT p99=0.41s  TPOT p99=29ms  steps=4124 avg_tok=14
+[sim seed=1 rate= 3.0] chunked-edf-512 SLO=100.0%  goodput=2.84/s  TTFT p99=0.39s  TPOT p99=30ms  steps=4109 avg_tok=14
+[sim seed=1 rate= 4.0] chunked-edf-64  SLO=100.0%  goodput=3.78/s  TTFT p99=0.88s  TPOT p99=42ms  steps=2595 avg_tok=22
+[sim seed=1 rate= 4.0] chunked-edf-128 SLO=100.0%  goodput=3.78/s  TTFT p99=0.56s  TPOT p99=42ms  steps=2671 avg_tok=21
+[sim seed=1 rate= 4.0] chunked-edf-256 SLO=100.0%  goodput=3.78/s  TTFT p99=0.49s  TPOT p99=41ms  steps=2701 avg_tok=21
+[sim seed=1 rate= 4.0] chunked-edf-512 SLO=100.0%  goodput=3.78/s  TTFT p99=0.45s  TPOT p99=42ms  steps=2695 avg_tok=21
+[sim seed=1 rate= 5.0] chunked-edf-64  SLO= 99.5%  goodput=4.58/s  TTFT p99=1.87s  TPOT p99=47ms  steps=1477 avg_tok=38
+[sim seed=1 rate= 5.0] chunked-edf-128 SLO=100.0%  goodput=4.69/s  TTFT p99=0.78s  TPOT p99=70ms  steps=1496 avg_tok=37
+[sim seed=1 rate= 5.0] chunked-edf-256 SLO=100.0%  goodput=4.70/s  TTFT p99=0.54s  TPOT p99=71ms  steps=1535 avg_tok=36
+[sim seed=1 rate= 5.0] chunked-edf-512 SLO=100.0%  goodput=4.70/s  TTFT p99=0.48s  TPOT p99=71ms  steps=1533 avg_tok=37
+[sim seed=1 rate= 6.0] chunked-edf-64  SLO= 88.0%  goodput=4.29/s  TTFT p99=20.40s  TPOT p99=49ms  steps=1234 avg_tok=45
+[sim seed=1 rate= 6.0] chunked-edf-128 SLO= 96.5%  goodput=5.00/s  TTFT p99=5.29s  TPOT p99=85ms  steps=920 avg_tok=61
+[sim seed=1 rate= 6.0] chunked-edf-256 SLO= 72.0%  goodput=3.76/s  TTFT p99=1.08s  TPOT p99=138ms  steps=873 avg_tok=64
+[sim seed=1 rate= 6.0] chunked-edf-512 SLO= 67.0%  goodput=3.50/s  TTFT p99=0.63s  TPOT p99=160ms  steps=859 avg_tok=65
+[sim seed=1 rate= 7.0] chunked-edf-64  SLO= 79.0%  goodput=3.98/s  TTFT p99=19.15s  TPOT p99=53ms  steps=1079 avg_tok=52
+[sim seed=1 rate= 7.0] chunked-edf-128 SLO= 85.5%  goodput=4.61/s  TTFT p99=17.83s  TPOT p99=85ms  steps=756 avg_tok=74
+[sim seed=1 rate= 7.0] chunked-edf-256 SLO= 31.5%  goodput=1.71/s  TTFT p99=5.43s  TPOT p99=148ms  steps=653 avg_tok=86
+[sim seed=1 rate= 7.0] chunked-edf-512 SLO= 27.5%  goodput=1.47/s  TTFT p99=1.40s  TPOT p99=250ms  steps=621 avg_tok=90
+[sim seed=1 rate= 8.0] chunked-edf-64  SLO= 73.5%  goodput=3.81/s  TTFT p99=19.36s  TPOT p99=56ms  steps=996 avg_tok=56
+[sim seed=1 rate= 8.0] chunked-edf-128 SLO= 72.0%  goodput=3.89/s  TTFT p99=17.20s  TPOT p99=96ms  steps=694 avg_tok=81
+[sim seed=1 rate= 8.0] chunked-edf-256 SLO= 25.0%  goodput=1.40/s  TTFT p99=15.35s  TPOT p99=154ms  steps=514 avg_tok=109
+[sim seed=1 rate= 8.0] chunked-edf-512 SLO= 23.0%  goodput=1.25/s  TTFT p99=4.71s  TPOT p99=291ms  steps=482 avg_tok=116
+[sim seed=1 rate= 9.0] chunked-edf-64  SLO= 64.0%  goodput=3.34/s  TTFT p99=18.24s  TPOT p99=54ms  steps=963 avg_tok=58
+[sim seed=1 rate= 9.0] chunked-edf-128 SLO= 70.5%  goodput=3.94/s  TTFT p99=16.55s  TPOT p99=92ms  steps=627 avg_tok=89
+[sim seed=1 rate= 9.0] chunked-edf-256 SLO= 20.0%  goodput=1.12/s  TTFT p99=14.76s  TPOT p99=165ms  steps=440 avg_tok=127
+[sim seed=1 rate= 9.0] chunked-edf-512 SLO= 18.0%  goodput=0.99/s  TTFT p99=6.95s  TPOT p99=273ms  steps=402 avg_tok=139
+[sim seed=2 rate= 1.0] chunked-edf-64  SLO=100.0%  goodput=1.01/s  TTFT p99=0.76s  TPOT p99=24ms  steps=8043 avg_tok=8
+[sim seed=2 rate= 1.0] chunked-edf-128 SLO=100.0%  goodput=1.01/s  TTFT p99=0.63s  TPOT p99=24ms  steps=7857 avg_tok=8
+[sim seed=2 rate= 1.0] chunked-edf-256 SLO=100.0%  goodput=1.01/s  TTFT p99=0.57s  TPOT p99=24ms  steps=7757 avg_tok=8
+[sim seed=2 rate= 1.0] chunked-edf-512 SLO=100.0%  goodput=1.01/s  TTFT p99=0.56s  TPOT p99=24ms  steps=7704 avg_tok=8
+[sim seed=2 rate= 2.0] chunked-edf-64  SLO=100.0%  goodput=2.00/s  TTFT p99=0.82s  TPOT p99=29ms  steps=5692 avg_tok=11
+[sim seed=2 rate= 2.0] chunked-edf-128 SLO=100.0%  goodput=2.00/s  TTFT p99=0.69s  TPOT p99=28ms  steps=5565 avg_tok=11
+[sim seed=2 rate= 2.0] chunked-edf-256 SLO=100.0%  goodput=2.00/s  TTFT p99=0.66s  TPOT p99=28ms  steps=5510 avg_tok=11
+[sim seed=2 rate= 2.0] chunked-edf-512 SLO=100.0%  goodput=2.00/s  TTFT p99=0.72s  TPOT p99=28ms  steps=5478 avg_tok=11
+[sim seed=2 rate= 3.0] chunked-edf-64  SLO=100.0%  goodput=2.99/s  TTFT p99=0.97s  TPOT p99=35ms  steps=3814 avg_tok=16
+[sim seed=2 rate= 3.0] chunked-edf-128 SLO=100.0%  goodput=2.99/s  TTFT p99=0.71s  TPOT p99=36ms  steps=3869 avg_tok=16
+[sim seed=2 rate= 3.0] chunked-edf-256 SLO=100.0%  goodput=2.99/s  TTFT p99=0.66s  TPOT p99=36ms  steps=3868 avg_tok=16
+[sim seed=2 rate= 3.0] chunked-edf-512 SLO=100.0%  goodput=2.99/s  TTFT p99=0.72s  TPOT p99=37ms  steps=3847 avg_tok=16
+[sim seed=2 rate= 4.0] chunked-edf-64  SLO=100.0%  goodput=3.94/s  TTFT p99=1.43s  TPOT p99=48ms  steps=2184 avg_tok=29
+[sim seed=2 rate= 4.0] chunked-edf-128 SLO=100.0%  goodput=3.95/s  TTFT p99=1.02s  TPOT p99=50ms  steps=2297 avg_tok=27
+[sim seed=2 rate= 4.0] chunked-edf-256 SLO=100.0%  goodput=3.95/s  TTFT p99=0.75s  TPOT p99=58ms  steps=2327 avg_tok=27
+[sim seed=2 rate= 4.0] chunked-edf-512 SLO=100.0%  goodput=3.95/s  TTFT p99=0.75s  TPOT p99=60ms  steps=2304 avg_tok=27
+[sim seed=2 rate= 5.0] chunked-edf-64  SLO= 97.0%  goodput=4.52/s  TTFT p99=9.91s  TPOT p99=54ms  steps=1138 avg_tok=55
+[sim seed=2 rate= 5.0] chunked-edf-128 SLO=100.0%  goodput=4.86/s  TTFT p99=1.31s  TPOT p99=87ms  steps=1085 avg_tok=57
+[sim seed=2 rate= 5.0] chunked-edf-256 SLO= 99.0%  goodput=4.82/s  TTFT p99=0.89s  TPOT p99=95ms  steps=1100 avg_tok=57
+[sim seed=2 rate= 5.0] chunked-edf-512 SLO= 98.0%  goodput=4.77/s  TTFT p99=0.86s  TPOT p99=104ms  steps=1075 avg_tok=58
+[sim seed=2 rate= 6.0] chunked-edf-64  SLO= 89.5%  goodput=4.28/s  TTFT p99=26.56s  TPOT p99=50ms  steps=1104 avg_tok=56
+[sim seed=2 rate= 6.0] chunked-edf-128 SLO= 92.0%  goodput=4.74/s  TTFT p99=12.39s  TPOT p99=90ms  steps=637 avg_tok=98
+[sim seed=2 rate= 6.0] chunked-edf-256 SLO= 20.0%  goodput=1.04/s  TTFT p99=8.39s  TPOT p99=162ms  steps=459 avg_tok=136
+[sim seed=2 rate= 6.0] chunked-edf-512 SLO= 15.0%  goodput=0.77/s  TTFT p99=1.38s  TPOT p99=244ms  steps=397 avg_tok=157
+[sim seed=2 rate= 7.0] chunked-edf-64  SLO= 82.5%  goodput=4.00/s  TTFT p99=25.88s  TPOT p99=47ms  steps=1069 avg_tok=58
+[sim seed=2 rate= 7.0] chunked-edf-128 SLO= 85.0%  goodput=4.43/s  TTFT p99=23.35s  TPOT p99=96ms  steps=648 avg_tok=96
+[sim seed=2 rate= 7.0] chunked-edf-256 SLO= 10.0%  goodput=0.52/s  TTFT p99=14.82s  TPOT p99=170ms  steps=429 avg_tok=145
+[sim seed=2 rate= 7.0] chunked-edf-512 SLO=  8.0%  goodput=0.41/s  TTFT p99=10.60s  TPOT p99=314ms  steps=337 avg_tok=185
+[sim seed=2 rate= 8.0] chunked-edf-64  SLO= 70.0%  goodput=3.40/s  TTFT p99=23.95s  TPOT p99=49ms  steps=1051 avg_tok=59
+[sim seed=2 rate= 8.0] chunked-edf-128 SLO= 75.0%  goodput=3.97/s  TTFT p99=22.30s  TPOT p99=84ms  steps=624 avg_tok=100
+[sim seed=2 rate= 8.0] chunked-edf-256 SLO=  8.0%  goodput=0.42/s  TTFT p99=20.35s  TPOT p99=171ms  steps=410 avg_tok=152
+[sim seed=2 rate= 8.0] chunked-edf-512 SLO=  5.0%  goodput=0.26/s  TTFT p99=15.07s  TPOT p99=299ms  steps=278 avg_tok=224
+[sim seed=2 rate= 9.0] chunked-edf-64  SLO= 62.0%  goodput=2.99/s  TTFT p99=22.53s  TPOT p99=51ms  steps=1044 avg_tok=60
+[sim seed=2 rate= 9.0] chunked-edf-128 SLO= 68.0%  goodput=3.58/s  TTFT p99=20.79s  TPOT p99=88ms  steps=605 avg_tok=103
+[sim seed=2 rate= 9.0] chunked-edf-256 SLO=  6.5%  goodput=0.34/s  TTFT p99=18.83s  TPOT p99=178ms  steps=396 avg_tok=157
+[sim seed=2 rate= 9.0] chunked-edf-512 SLO=  3.5%  goodput=0.18/s  TTFT p99=14.78s  TPOT p99=320ms  steps=261 avg_tok=239
+[sim seed=3 rate= 1.0] chunked-edf-64  SLO=100.0%  goodput=0.88/s  TTFT p99=0.60s  TPOT p99=20ms  steps=9387 avg_tok=7
+[sim seed=3 rate= 1.0] chunked-edf-128 SLO=100.0%  goodput=0.88/s  TTFT p99=0.49s  TPOT p99=19ms  steps=9179 avg_tok=7
+[sim seed=3 rate= 1.0] chunked-edf-256 SLO=100.0%  goodput=0.88/s  TTFT p99=0.44s  TPOT p99=19ms  steps=9077 avg_tok=7
+[sim seed=3 rate= 1.0] chunked-edf-512 SLO=100.0%  goodput=0.88/s  TTFT p99=0.43s  TPOT p99=19ms  steps=9026 avg_tok=7
+[sim seed=3 rate= 2.0] chunked-edf-64  SLO=100.0%  goodput=1.76/s  TTFT p99=0.69s  TPOT p99=31ms  steps=6693 avg_tok=10
+[sim seed=3 rate= 2.0] chunked-edf-128 SLO=100.0%  goodput=1.76/s  TTFT p99=0.50s  TPOT p99=40ms  steps=6642 avg_tok=10
+[sim seed=3 rate= 2.0] chunked-edf-256 SLO=100.0%  goodput=1.76/s  TTFT p99=0.44s  TPOT p99=40ms  steps=6600 avg_tok=10
+[sim seed=3 rate= 2.0] chunked-edf-512 SLO=100.0%  goodput=1.76/s  TTFT p99=0.43s  TPOT p99=42ms  steps=6569 avg_tok=10
+[sim seed=3 rate= 3.0] chunked-edf-64  SLO=100.0%  goodput=2.63/s  TTFT p99=1.06s  TPOT p99=36ms  steps=4482 avg_tok=14
+[sim seed=3 rate= 3.0] chunked-edf-128 SLO=100.0%  goodput=2.63/s  TTFT p99=0.64s  TPOT p99=43ms  steps=4531 avg_tok=14
+[sim seed=3 rate= 3.0] chunked-edf-256 SLO=100.0%  goodput=2.63/s  TTFT p99=0.52s  TPOT p99=44ms  steps=4532 avg_tok=14
+[sim seed=3 rate= 3.0] chunked-edf-512 SLO=100.0%  goodput=2.63/s  TTFT p99=0.52s  TPOT p99=45ms  steps=4507 avg_tok=14
+[sim seed=3 rate= 4.0] chunked-edf-64  SLO=100.0%  goodput=3.50/s  TTFT p99=1.31s  TPOT p99=46ms  steps=2596 avg_tok=25
+[sim seed=3 rate= 4.0] chunked-edf-128 SLO=100.0%  goodput=3.50/s  TTFT p99=0.81s  TPOT p99=51ms  steps=2716 avg_tok=23
+[sim seed=3 rate= 4.0] chunked-edf-256 SLO=100.0%  goodput=3.50/s  TTFT p99=0.62s  TPOT p99=57ms  steps=2751 avg_tok=23
+[sim seed=3 rate= 4.0] chunked-edf-512 SLO=100.0%  goodput=3.50/s  TTFT p99=0.57s  TPOT p99=55ms  steps=2734 avg_tok=23
+[sim seed=3 rate= 5.0] chunked-edf-64  SLO= 99.5%  goodput=4.16/s  TTFT p99=1.81s  TPOT p99=49ms  steps=1496 avg_tok=43
+[sim seed=3 rate= 5.0] chunked-edf-128 SLO=100.0%  goodput=4.23/s  TTFT p99=1.04s  TPOT p99=89ms  steps=1448 avg_tok=44
+[sim seed=3 rate= 5.0] chunked-edf-256 SLO= 98.5%  goodput=4.18/s  TTFT p99=0.69s  TPOT p99=100ms  steps=1448 avg_tok=44
+[sim seed=3 rate= 5.0] chunked-edf-512 SLO= 98.0%  goodput=4.16/s  TTFT p99=0.65s  TPOT p99=105ms  steps=1431 avg_tok=45
+[sim seed=3 rate= 6.0] chunked-edf-64  SLO= 89.0%  goodput=3.94/s  TTFT p99=24.83s  TPOT p99=52ms  steps=1136 avg_tok=56
+[sim seed=3 rate= 6.0] chunked-edf-128 SLO= 97.0%  goodput=4.56/s  TTFT p99=7.01s  TPOT p99=88ms  steps=810 avg_tok=79
+[sim seed=3 rate= 6.0] chunked-edf-256 SLO= 69.5%  goodput=3.21/s  TTFT p99=1.43s  TPOT p99=161ms  steps=759 avg_tok=84
+[sim seed=3 rate= 6.0] chunked-edf-512 SLO= 67.5%  goodput=3.12/s  TTFT p99=0.83s  TPOT p99=192ms  steps=739 avg_tok=86
+[sim seed=3 rate= 7.0] chunked-edf-64  SLO= 81.5%  goodput=3.61/s  TTFT p99=24.99s  TPOT p99=57ms  steps=1106 avg_tok=58
+[sim seed=3 rate= 7.0] chunked-edf-128 SLO= 81.5%  goodput=3.91/s  TTFT p99=21.17s  TPOT p99=97ms  steps=659 avg_tok=97
+[sim seed=3 rate= 7.0] chunked-edf-256 SLO= 20.5%  goodput=0.97/s  TTFT p99=10.63s  TPOT p99=182ms  steps=516 avg_tok=123
+[sim seed=3 rate= 7.0] chunked-edf-512 SLO= 18.5%  goodput=0.86/s  TTFT p99=2.16s  TPOT p99=289ms  steps=480 avg_tok=133
+[sim seed=3 rate= 8.0] chunked-edf-64  SLO= 73.5%  goodput=3.31/s  TTFT p99=25.66s  TPOT p99=55ms  steps=1099 avg_tok=58
+[sim seed=3 rate= 8.0] chunked-edf-128 SLO= 78.0%  goodput=3.78/s  TTFT p99=21.99s  TPOT p99=93ms  steps=634 avg_tok=100
+[sim seed=3 rate= 8.0] chunked-edf-256 SLO= 12.0%  goodput=0.57/s  TTFT p99=20.25s  TPOT p99=182ms  steps=446 avg_tok=143
+[sim seed=3 rate= 8.0] chunked-edf-512 SLO=  8.5%  goodput=0.39/s  TTFT p99=9.73s  TPOT p99=346ms  steps=394 avg_tok=162
+[sim seed=3 rate= 9.0] chunked-edf-64  SLO= 68.0%  goodput=3.07/s  TTFT p99=23.97s  TPOT p99=54ms  steps=1094 avg_tok=58
+[sim seed=3 rate= 9.0] chunked-edf-128 SLO= 70.5%  goodput=3.40/s  TTFT p99=21.18s  TPOT p99=95ms  steps=617 avg_tok=103
+[sim seed=3 rate= 9.0] chunked-edf-256 SLO=  8.0%  goodput=0.38/s  TTFT p99=20.14s  TPOT p99=185ms  steps=408 avg_tok=156
+[sim seed=3 rate= 9.0] chunked-edf-512 SLO=  4.5%  goodput=0.21/s  TTFT p99=17.16s  TPOT p99=361ms  steps=353 avg_tok=180
+[sim seed=4 rate= 1.0] chunked-edf-64  SLO=100.0%  goodput=0.92/s  TTFT p99=0.78s  TPOT p99=23ms  steps=9026 avg_tok=7
+[sim seed=4 rate= 1.0] chunked-edf-128 SLO=100.0%  goodput=0.92/s  TTFT p99=0.63s  TPOT p99=23ms  steps=8786 avg_tok=7
+[sim seed=4 rate= 1.0] chunked-edf-256 SLO=100.0%  goodput=0.92/s  TTFT p99=0.57s  TPOT p99=22ms  steps=8662 avg_tok=7
+[sim seed=4 rate= 1.0] chunked-edf-512 SLO=100.0%  goodput=0.92/s  TTFT p99=0.56s  TPOT p99=22ms  steps=8603 avg_tok=8
+[sim seed=4 rate= 2.0] chunked-edf-64  SLO=100.0%  goodput=1.83/s  TTFT p99=0.91s  TPOT p99=30ms  steps=6350 avg_tok=10
+[sim seed=4 rate= 2.0] chunked-edf-128 SLO=100.0%  goodput=1.83/s  TTFT p99=0.71s  TPOT p99=32ms  steps=6266 avg_tok=10
+[sim seed=4 rate= 2.0] chunked-edf-256 SLO=100.0%  goodput=1.83/s  TTFT p99=0.68s  TPOT p99=33ms  steps=6210 avg_tok=10
+[sim seed=4 rate= 2.0] chunked-edf-512 SLO=100.0%  goodput=1.83/s  TTFT p99=0.64s  TPOT p99=31ms  steps=6169 avg_tok=10
+[sim seed=4 rate= 3.0] chunked-edf-64  SLO=100.0%  goodput=2.72/s  TTFT p99=1.65s  TPOT p99=45ms  steps=4115 avg_tok=16
+[sim seed=4 rate= 3.0] chunked-edf-128 SLO=100.0%  goodput=2.72/s  TTFT p99=0.92s  TPOT p99=57ms  steps=4171 avg_tok=16
+[sim seed=4 rate= 3.0] chunked-edf-256 SLO=100.0%  goodput=2.72/s  TTFT p99=0.72s  TPOT p99=58ms  steps=4169 avg_tok=16
+[sim seed=4 rate= 3.0] chunked-edf-512 SLO=100.0%  goodput=2.72/s  TTFT p99=0.77s  TPOT p99=59ms  steps=4142 avg_tok=16
+[sim seed=4 rate= 4.0] chunked-edf-64  SLO= 98.5%  goodput=3.53/s  TTFT p99=6.67s  TPOT p99=49ms  steps=2484 avg_tok=26
+[sim seed=4 rate= 4.0] chunked-edf-128 SLO= 99.5%  goodput=3.57/s  TTFT p99=1.84s  TPOT p99=88ms  steps=2542 avg_tok=25
+[sim seed=4 rate= 4.0] chunked-edf-256 SLO= 94.5%  goodput=3.39/s  TTFT p99=1.17s  TPOT p99=114ms  steps=2552 avg_tok=25
+[sim seed=4 rate= 4.0] chunked-edf-512 SLO= 91.5%  goodput=3.29/s  TTFT p99=0.83s  TPOT p99=116ms  steps=2529 avg_tok=26
+[sim seed=4 rate= 5.0] chunked-edf-64  SLO= 94.5%  goodput=4.05/s  TTFT p99=24.56s  TPOT p99=54ms  steps=1384 avg_tok=47
+[sim seed=4 rate= 5.0] chunked-edf-128 SLO= 98.5%  goodput=4.36/s  TTFT p99=2.09s  TPOT p99=97ms  steps=1282 avg_tok=50
+[sim seed=4 rate= 5.0] chunked-edf-256 SLO= 77.5%  goodput=3.43/s  TTFT p99=1.87s  TPOT p99=145ms  steps=1327 avg_tok=49
+[sim seed=4 rate= 5.0] chunked-edf-512 SLO= 76.0%  goodput=3.37/s  TTFT p99=1.24s  TPOT p99=175ms  steps=1312 avg_tok=49
+[sim seed=4 rate= 6.0] chunked-edf-64  SLO= 91.5%  goodput=4.13/s  TTFT p99=26.09s  TPOT p99=53ms  steps=1117 avg_tok=58
+[sim seed=4 rate= 6.0] chunked-edf-128 SLO= 93.5%  goodput=4.37/s  TTFT p99=23.06s  TPOT p99=97ms  steps=809 avg_tok=80
+[sim seed=4 rate= 6.0] chunked-edf-256 SLO= 36.0%  goodput=1.66/s  TTFT p99=6.22s  TPOT p99=192ms  steps=658 avg_tok=98
+[sim seed=4 rate= 6.0] chunked-edf-512 SLO= 36.5%  goodput=1.73/s  TTFT p99=1.52s  TPOT p99=222ms  steps=625 avg_tok=103
+[sim seed=4 rate= 7.0] chunked-edf-64  SLO= 84.0%  goodput=3.84/s  TTFT p99=26.12s  TPOT p99=52ms  steps=1084 avg_tok=60
+[sim seed=4 rate= 7.0] chunked-edf-128 SLO= 87.5%  goodput=4.24/s  TTFT p99=23.41s  TPOT p99=106ms  steps=687 avg_tok=94
+[sim seed=4 rate= 7.0] chunked-edf-256 SLO= 22.5%  goodput=1.08/s  TTFT p99=20.79s  TPOT p99=175ms  steps=517 avg_tok=125
+[sim seed=4 rate= 7.0] chunked-edf-512 SLO= 17.0%  goodput=0.79/s  TTFT p99=7.12s  TPOT p99=354ms  steps=439 avg_tok=147
+[sim seed=4 rate= 8.0] chunked-edf-64  SLO= 72.5%  goodput=3.27/s  TTFT p99=26.01s  TPOT p99=58ms  steps=1122 avg_tok=58
+[sim seed=4 rate= 8.0] chunked-edf-128 SLO= 81.5%  goodput=4.06/s  TTFT p99=22.75s  TPOT p99=103ms  steps=618 avg_tok=105
+[sim seed=4 rate= 8.0] chunked-edf-256 SLO= 14.0%  goodput=0.70/s  TTFT p99=20.74s  TPOT p99=199ms  steps=463 avg_tok=140
+[sim seed=4 rate= 8.0] chunked-edf-512 SLO=  9.5%  goodput=0.43/s  TTFT p99=19.02s  TPOT p99=357ms  steps=376 avg_tok=172
+[sim seed=4 rate= 9.0] chunked-edf-64  SLO= 66.5%  goodput=2.98/s  TTFT p99=25.37s  TPOT p99=52ms  steps=1182 avg_tok=55
+[sim seed=4 rate= 9.0] chunked-edf-128 SLO= 71.5%  goodput=3.49/s  TTFT p99=22.37s  TPOT p99=90ms  steps=682 avg_tok=95
+[sim seed=4 rate= 9.0] chunked-edf-256 SLO=  7.0%  goodput=0.36/s  TTFT p99=20.62s  TPOT p99=184ms  steps=429 avg_tok=151
+[sim seed=4 rate= 9.0] chunked-edf-512 SLO=  4.5%  goodput=0.20/s  TTFT p99=19.13s  TPOT p99=358ms  steps=343 avg_tok=189
+g_tok=52
+[sim seed=2 rate= 6.0] chunked-edf-512 SLO=  8.0%  goodput=0.41/s  TTFT p99=1.38s  TPOT p99=244ms  steps=397 avg_tok=157
+[sim seed=1 rate= 7.0] chunked-edf-128 SLO= 62.5%  goodput=2.90/s  TTFT p99=18.74s  TPOT p99=90ms  steps=806 avg_tok=81
+[sim seed=2 rate= 7.0] chunked-edf-64  SLO= 80.0%  goodput=3.88/s  TTFT p99=25.90s  TPOT p99=48ms  steps=1069 avg_tok=58
+[sim seed=2 rate= 7.0] chunked-edf-64  SLO= 82.5%  goodput=4.00/s  TTFT p99=25.88s  TPOT p99=47ms  steps=1069 avg_tok=58
+[sim seed=1 rate= 7.0] chunked-edf-256 SLO= 17.5%  goodput=0.84/s  TTFT p99=17.53s  TPOT p99=162ms  steps=599 avg_tok=109
+[sim seed=2 rate= 7.0] chunked-edf-128 SLO= 85.0%  goodput=4.43/s  TTFT p99=23.35s  TPOT p99=96ms  steps=648 avg_tok=96
+[sim seed=1 rate= 7.0] chunked-edf-512 SLO= 15.5%  goodput=0.73/s  TTFT p99=13.11s  TPOT p99=329ms  steps=496 avg_tok=132
+[sim seed=2 rate= 7.0] chunked-edf-128 SLO=  8.0%  goodput=0.42/s  TTFT p99=23.35s  TPOT p99=96ms  steps=648 avg_tok=96
+[sim seed=2 rate= 7.0] chunked-edf-256 SLO= 68.5%  goodput=3.59/s  TTFT p99=14.82s  TPOT p99=170ms  steps=429 avg_tok=145
+[sim seed=2 rate= 7.0] chunked-edf-256 SLO=  6.0%  goodput=0.31/s  TTFT p99=14.82s  TPOT p99=170ms  steps=429 avg_tok=145
+[sim seed=2 rate= 7.0] chunked-edf-512 SLO= 13.0%  goodput=0.66/s  TTFT p99=10.60s  TPOT p99=314ms  steps=337 avg_tok=185
+[sim seed=2 rate= 1.0] chunked-edf-64  SLO= 98.0%  goodput=0.68/s  TTFT p99=2.08s  TPOT p99=44ms  steps=4116 avg_tok=14
+[sim seed=2 rate= 7.0] chunked-edf-512 SLO=  6.0%  goodput=0.30/s  TTFT p99=10.60s  TPOT p99=314ms  steps=337 avg_tok=185
+[sim seed=2 rate= 1.0] chunked-edf-128 SLO=100.0%  goodput=0.70/s  TTFT p99=1.42s  TPOT p99=53ms  steps=3929 avg_tok=15
+[sim seed=2 rate= 1.0] chunked-edf-256 SLO=100.0%  goodput=0.70/s  TTFT p99=1.07s  TPOT p99=63ms  steps=3854 avg_tok=15
+[sim seed=2 rate= 8.0] chunked-edf-64  SLO= 70.5%  goodput=3.42/s  TTFT p99=23.95s  TPOT p99=49ms  steps=1051 avg_tok=59
+[sim seed=2 rate= 1.0] chunked-edf-512 SLO=100.0%  goodput=0.70/s  TTFT p99=0.95s  TPOT p99=67ms  steps=3817 avg_tok=16
+[sim seed=2 rate= 8.0] chunked-edf-64  SLO= 70.0%  goodput=3.40/s  TTFT p99=23.95s  TPOT p99=49ms  steps=1051 avg_tok=59
+[sim seed=2 rate= 8.0] chunked-edf-128 SLO= 76.0%  goodput=4.06/s  TTFT p99=22.25s  TPOT p99=84ms  steps=624 avg_tok=100
+[sim seed=2 rate= 2.0] chunked-edf-64  SLO= 94.0%  goodput=1.30/s  TTFT p99=7.39s  TPOT p99=47ms  steps=3143 avg_tok=19
+[sim seed=2 rate= 8.0] chunked-edf-128 SLO=  7.5%  goodput=0.40/s  TTFT p99=22.30s  TPOT p99=84ms  steps=624 avg_tok=100
+[sim seed=2 rate= 8.0] chunked-edf-256 SLO= 56.0%  goodput=2.96/s  TTFT p99=20.35s  TPOT p99=171ms  steps=410 avg_tok=152
+[sim seed=2 rate= 2.0] chunked-edf-128 SLO= 99.5%  goodput=1.38/s  TTFT p99=1.96s  TPOT p99=68ms  steps=2986 avg_tok=20
+[sim seed=2 rate= 8.0] chunked-edf-512 SLO=  9.0%  goodput=0.46/s  TTFT p99=15.07s  TPOT p99=299ms  steps=278 avg_tok=224
+[sim seed=2 rate= 8.0] chunked-edf-256 SLO=  4.0%  goodput=0.21/s  TTFT p99=20.35s  TPOT p99=171ms  steps=410 avg_tok=152
+[sim seed=2 rate= 8.0] chunked-edf-512 SLO=  3.5%  goodput=0.18/s  TTFT p99=15.07s  TPOT p99=299ms  steps=278 avg_tok=224
+[sim seed=2 rate= 2.0] chunked-edf-256 SLO= 99.5%  goodput=1.38/s  TTFT p99=1.23s  TPOT p99=96ms  steps=2923 avg_tok=20
+[sim seed=2 rate= 2.0] chunked-edf-512 SLO= 97.5%  goodput=1.35/s  TTFT p99=1.12s  TPOT p99=106ms  steps=2898 avg_tok=21
+[sim seed=2 rate= 3.0] chunked-edf-64  SLO= 89.0%  goodput=1.82/s  TTFT p99=11.06s  TPOT p99=49ms  steps=2543 avg_tok=23
+[sim seed=2 rate= 3.0] chunked-edf-128 SLO= 96.5%  goodput=1.97/s  TTFT p99=8.64s  TPOT p99=77ms  steps=2344 avg_tok=25
+[sim seed=2 rate= 3.0] chunked-edf-256 SLO= 79.5%  goodput=1.63/s  TTFT p99=1.77s  TPOT p99=117ms  steps=2232 avg_tok=27
+[sim seed=2 rate= 3.0] chunked-edf-512 SLO= 78.0%  goodput=1.60/s  TTFT p99=1.25s  TPOT p99=147ms  steps=2198 avg_tok=27
+[sim seed=2 rate= 4.0] chunked-edf-64  SLO= 78.5%  goodput=2.10/s  TTFT p99=10.55s  TPOT p99=57ms  steps=2194 avg_tok=27
+[sim seed=2 rate= 4.0] chunked-edf-128 SLO= 92.5%  goodput=2.49/s  TTFT p99=8.73s  TPOT p99=80ms  steps=1920 avg_tok=31
+[sim seed=2 rate= 4.0] chunked-edf-256 SLO= 75.5%  goodput=2.03/s  TTFT p99=7.32s  TPOT p99=132ms  steps=1822 avg_tok=33
+[sim seed=2 rate= 4.0] chunked-edf-512 SLO= 69.0%  goodput=1.86/s  TTFT p99=1.66s  TPOT p99=189ms  steps=1785 avg_tok=33
+[sim seed=2 rate= 5.0] chunked-edf-64  SLO= 78.0%  goodput=2.58/s  TTFT p99=10.05s  TPOT p99=49ms  steps=2022 avg_tok=30
+[sim seed=2 rate= 5.0] chunked-edf-128 SLO= 83.0%  goodput=2.75/s  TTFT p99=8.50s  TPOT p99=82ms  steps=1800 avg_tok=33
+[sim seed=2 rate= 5.0] chunked-edf-256 SLO= 69.0%  goodput=2.29/s  TTFT p99=6.82s  TPOT p99=134ms  steps=1694 avg_tok=35
+[sim seed=2 rate= 5.0] chunked-edf-512 SLO= 66.0%  goodput=2.19/s  TTFT p99=1.91s  TPOT p99=208ms  steps=1663 avg_tok=36
+[sim seed=2 rate= 6.0] chunked-edf-64  SLO= 73.5%  goodput=2.76/s  TTFT p99=12.59s  TPOT p99=55ms  steps=1796 avg_tok=33
+[sim seed=2 rate= 6.0] chunked-edf-128 SLO= 77.5%  goodput=3.00/s  TTFT p99=8.05s  TPOT p99=87ms  steps=1497 avg_tok=40
+[sim seed=2 rate= 6.0] chunked-edf-256 SLO= 66.0%  goodput=2.56/s  TTFT p99=6.23s  TPOT p99=137ms  steps=1459 avg_tok=41
+[sim seed=2 rate= 6.0] chunked-edf-512 SLO= 64.0%  goodput=2.48/s  TTFT p99=2.80s  TPOT p99=208ms  steps=1413 avg_tok=42
+[sim seed=2 rate= 7.0] chunked-edf-64  SLO= 71.0%  goodput=2.93/s  TTFT p99=12.87s  TPOT p99=53ms  steps=1536 avg_tok=39
+[sim seed=2 rate= 7.0] chunked-edf-128 SLO= 77.0%  goodput=3.27/s  TTFT p99=10.48s  TPOT p99=90ms  steps=1213 avg_tok=49
+[sim seed=2 rate= 7.0] chunked-edf-256 SLO= 52.5%  goodput=2.25/s  TTFT p99=6.18s  TPOT p99=138ms  steps=1127 avg_tok=53
+[sim seed=2 rate= 7.0] chunked-edf-512 SLO= 53.0%  goodput=2.26/s  TTFT p99=5.20s  TPOT p99=208ms  steps=1088 avg_tok=55

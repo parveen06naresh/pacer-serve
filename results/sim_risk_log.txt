@@ -1,0 +1,75 @@
+[sim seed=0 rate= 4.0] pacer           SLO=100.0%  goodput=3.41/s  TTFT p99=1.26s  TPOT p99=94ms  steps=2910 avg_tok=21
+[sim seed=0 rate= 4.0] pacer-risk50    SLO=100.0%  goodput=3.41/s  TTFT p99=1.20s  TPOT p99=98ms  steps=2895 avg_tok=21
+[sim seed=0 rate= 4.0] pacer-risk80    SLO=100.0%  goodput=3.41/s  TTFT p99=1.25s  TPOT p99=95ms  steps=2910 avg_tok=21
+[sim seed=0 rate= 4.0] pacer-risk95    SLO=100.0%  goodput=3.41/s  TTFT p99=1.25s  TPOT p99=92ms  steps=2926 avg_tok=21
+[sim seed=0 rate= 4.0] pacer-risk99    SLO= 98.5%  goodput=3.36/s  TTFT p99=3.35s  TPOT p99=37ms  steps=2971 avg_tok=21
+[sim seed=0 rate= 5.0] pacer           SLO= 98.5%  goodput=4.15/s  TTFT p99=2.02s  TPOT p99=95ms  steps=1619 avg_tok=38
+[sim seed=0 rate= 5.0] pacer-risk50    SLO= 98.5%  goodput=4.15/s  TTFT p99=1.92s  TPOT p99=100ms  steps=1612 avg_tok=38
+[sim seed=0 rate= 5.0] pacer-risk80    SLO= 99.0%  goodput=4.17/s  TTFT p99=1.96s  TPOT p99=97ms  steps=1612 avg_tok=38
+[sim seed=0 rate= 5.0] pacer-risk95    SLO= 98.5%  goodput=4.15/s  TTFT p99=2.07s  TPOT p99=94ms  steps=1629 avg_tok=38
+[sim seed=0 rate= 5.0] pacer-risk99    SLO= 96.0%  goodput=4.02/s  TTFT p99=10.75s  TPOT p99=39ms  steps=1701 avg_tok=36
+[sim seed=0 rate= 6.0] pacer           SLO= 93.0%  goodput=4.36/s  TTFT p99=17.20s  TPOT p99=97ms  steps=688 avg_tok=90
+[sim seed=0 rate= 6.0] pacer-risk50    SLO= 93.5%  goodput=4.37/s  TTFT p99=27.91s  TPOT p99=100ms  steps=675 avg_tok=92
+[sim seed=0 rate= 6.0] pacer-risk80    SLO= 92.0%  goodput=4.29/s  TTFT p99=27.98s  TPOT p99=98ms  steps=680 avg_tok=91
+[sim seed=0 rate= 6.0] pacer-risk95    SLO= 92.5%  goodput=4.33/s  TTFT p99=17.21s  TPOT p99=95ms  steps=697 avg_tok=89
+[sim seed=0 rate= 6.0] pacer-risk99    SLO= 91.0%  goodput=3.88/s  TTFT p99=31.60s  TPOT p99=42ms  steps=1633 avg_tok=38
+[sim seed=0 rate= 7.0] pacer           SLO= 85.0%  goodput=4.11/s  TTFT p99=26.94s  TPOT p99=97ms  steps=643 avg_tok=96
+[sim seed=0 rate= 7.0] pacer-risk50    SLO= 86.0%  goodput=4.17/s  TTFT p99=26.84s  TPOT p99=100ms  steps=625 avg_tok=99
+[sim seed=0 rate= 7.0] pacer-risk80    SLO= 81.0%  goodput=3.80/s  TTFT p99=26.15s  TPOT p99=98ms  steps=591 avg_tok=105
+[sim seed=0 rate= 7.0] pacer-risk95    SLO= 85.5%  goodput=4.15/s  TTFT p99=27.33s  TPOT p99=95ms  steps=656 avg_tok=94
+[sim seed=0 rate= 7.0] pacer-risk99    SLO= 81.5%  goodput=3.49/s  TTFT p99=29.99s  TPOT p99=41ms  steps=1603 avg_tok=39
+[sim seed=0 rate= 8.0] pacer           SLO= 83.5%  goodput=4.17/s  TTFT p99=24.99s  TPOT p99=98ms  steps=612 avg_tok=101
+[sim seed=0 rate= 8.0] pacer-risk50    SLO= 82.0%  goodput=4.10/s  TTFT p99=25.07s  TPOT p99=100ms  steps=599 avg_tok=103
+[sim seed=0 rate= 8.0] pacer-risk80    SLO= 84.0%  goodput=4.19/s  TTFT p99=25.02s  TPOT p99=98ms  steps=606 avg_tok=102
+[sim seed=0 rate= 8.0] pacer-risk95    SLO= 81.0%  goodput=4.03/s  TTFT p99=25.14s  TPOT p99=96ms  steps=631 avg_tok=98
+[sim seed=0 rate= 8.0] pacer-risk99    SLO= 68.5%  goodput=2.93/s  TTFT p99=27.64s  TPOT p99=42ms  steps=1589 avg_tok=39
+[sim seed=1 rate= 4.0] pacer           SLO=100.0%  goodput=3.78/s  TTFT p99=0.42s  TPOT p99=43ms  steps=2660 avg_tok=21
+[sim seed=1 rate= 4.0] pacer-risk50    SLO=100.0%  goodput=3.78/s  TTFT p99=0.39s  TPOT p99=42ms  steps=2660 avg_tok=21
+[sim seed=1 rate= 4.0] pacer-risk80    SLO=100.0%  goodput=3.78/s  TTFT p99=0.42s  TPOT p99=43ms  steps=2659 avg_tok=21
+[sim seed=1 rate= 4.0] pacer-risk95    SLO=100.0%  goodput=3.78/s  TTFT p99=0.48s  TPOT p99=43ms  steps=2659 avg_tok=21
+[sim seed=1 rate= 4.0] pacer-risk99    SLO=100.0%  goodput=3.78/s  TTFT p99=0.86s  TPOT p99=35ms  steps=2665 avg_tok=21
+[sim seed=1 rate= 5.0] pacer           SLO=100.0%  goodput=4.69/s  TTFT p99=0.53s  TPOT p99=76ms  steps=1517 avg_tok=37
+[sim seed=1 rate= 5.0] pacer-risk50    SLO=100.0%  goodput=4.69/s  TTFT p99=0.52s  TPOT p99=73ms  steps=1520 avg_tok=37
+[sim seed=1 rate= 5.0] pacer-risk80    SLO=100.0%  goodput=4.69/s  TTFT p99=0.50s  TPOT p99=73ms  steps=1522 avg_tok=37
+[sim seed=1 rate= 5.0] pacer-risk95    SLO=100.0%  goodput=4.69/s  TTFT p99=0.57s  TPOT p99=75ms  steps=1517 avg_tok=37
+[sim seed=1 rate= 5.0] pacer-risk99    SLO= 95.5%  goodput=4.26/s  TTFT p99=6.27s  TPOT p99=41ms  steps=1741 avg_tok=32
+[sim seed=1 rate= 6.0] pacer           SLO= 98.5%  goodput=5.16/s  TTFT p99=2.04s  TPOT p99=96ms  steps=880 avg_tok=64
+[sim seed=1 rate= 6.0] pacer-risk50    SLO= 98.0%  goodput=5.14/s  TTFT p99=1.98s  TPOT p99=99ms  steps=873 avg_tok=64
+[sim seed=1 rate= 6.0] pacer-risk80    SLO= 99.0%  goodput=5.19/s  TTFT p99=2.00s  TPOT p99=97ms  steps=879 avg_tok=64
+[sim seed=1 rate= 6.0] pacer-risk95    SLO= 97.5%  goodput=5.10/s  TTFT p99=2.07s  TPOT p99=93ms  steps=882 avg_tok=63
+[sim seed=1 rate= 6.0] pacer-risk99    SLO= 84.0%  goodput=3.90/s  TTFT p99=21.23s  TPOT p99=36ms  steps=1621 avg_tok=35
+[sim seed=1 rate= 7.0] pacer           SLO= 84.5%  goodput=4.54/s  TTFT p99=15.31s  TPOT p99=97ms  steps=720 avg_tok=78
+[sim seed=1 rate= 7.0] pacer-risk50    SLO= 87.5%  goodput=4.69/s  TTFT p99=15.00s  TPOT p99=100ms  steps=727 avg_tok=77
+[sim seed=1 rate= 7.0] pacer-risk80    SLO= 85.0%  goodput=4.55/s  TTFT p99=15.37s  TPOT p99=98ms  steps=731 avg_tok=77
+[sim seed=1 rate= 7.0] pacer-risk95    SLO= 89.0%  goodput=4.85/s  TTFT p99=14.67s  TPOT p99=94ms  steps=722 avg_tok=78
+[sim seed=1 rate= 7.0] pacer-risk99    SLO= 74.5%  goodput=3.55/s  TTFT p99=22.21s  TPOT p99=39ms  steps=1481 avg_tok=38
+[sim seed=1 rate= 8.0] pacer           SLO= 76.5%  goodput=4.24/s  TTFT p99=17.37s  TPOT p99=97ms  steps=595 avg_tok=94
+[sim seed=1 rate= 8.0] pacer-risk50    SLO= 79.5%  goodput=4.44/s  TTFT p99=17.34s  TPOT p99=100ms  steps=573 avg_tok=98
+[sim seed=1 rate= 8.0] pacer-risk80    SLO= 75.5%  goodput=4.20/s  TTFT p99=17.13s  TPOT p99=98ms  steps=590 avg_tok=95
+[sim seed=1 rate= 8.0] pacer-risk95    SLO= 74.0%  goodput=4.04/s  TTFT p99=17.44s  TPOT p99=94ms  steps=663 avg_tok=84
+[sim seed=1 rate= 8.0] pacer-risk99    SLO= 65.5%  goodput=3.15/s  TTFT p99=20.66s  TPOT p99=40ms  steps=1438 avg_tok=39
+[sim seed=2 rate= 4.0] pacer           SLO=100.0%  goodput=3.95/s  TTFT p99=0.80s  TPOT p99=58ms  steps=2265 avg_tok=28
+[sim seed=2 rate= 4.0] pacer-risk50    SLO=100.0%  goodput=3.95/s  TTFT p99=0.83s  TPOT p99=60ms  steps=2248 avg_tok=28
+[sim seed=2 rate= 4.0] pacer-risk80    SLO=100.0%  goodput=3.95/s  TTFT p99=0.84s  TPOT p99=58ms  steps=2255 avg_tok=28
+[sim seed=2 rate= 4.0] pacer-risk95    SLO=100.0%  goodput=3.95/s  TTFT p99=0.79s  TPOT p99=63ms  steps=2244 avg_tok=28
+[sim seed=2 rate= 4.0] pacer-risk99    SLO=100.0%  goodput=3.94/s  TTFT p99=1.36s  TPOT p99=41ms  steps=2284 avg_tok=27
+[sim seed=2 rate= 5.0] pacer           SLO=100.0%  goodput=4.87/s  TTFT p99=1.00s  TPOT p99=89ms  steps=1090 avg_tok=57
+[sim seed=2 rate= 5.0] pacer-risk50    SLO=100.0%  goodput=4.87/s  TTFT p99=1.01s  TPOT p99=92ms  steps=1075 avg_tok=58
+[sim seed=2 rate= 5.0] pacer-risk80    SLO=100.0%  goodput=4.87/s  TTFT p99=1.00s  TPOT p99=92ms  steps=1077 avg_tok=58
+[sim seed=2 rate= 5.0] pacer-risk95    SLO=100.0%  goodput=4.87/s  TTFT p99=1.01s  TPOT p99=88ms  steps=1090 avg_tok=57
+[sim seed=2 rate= 5.0] pacer-risk99    SLO= 93.5%  goodput=4.19/s  TTFT p99=30.22s  TPOT p99=40ms  steps=1512 avg_tok=41
+[sim seed=2 rate= 6.0] pacer           SLO= 92.0%  goodput=4.74/s  TTFT p99=19.20s  TPOT p99=97ms  steps=553 avg_tok=113
+[sim seed=2 rate= 6.0] pacer-risk50    SLO= 90.0%  goodput=4.64/s  TTFT p99=18.37s  TPOT p99=100ms  steps=539 avg_tok=116
+[sim seed=2 rate= 6.0] pacer-risk80    SLO= 91.0%  goodput=4.69/s  TTFT p99=18.98s  TPOT p99=97ms  steps=545 avg_tok=114
+[sim seed=2 rate= 6.0] pacer-risk95    SLO= 90.0%  goodput=4.69/s  TTFT p99=17.68s  TPOT p99=96ms  steps=553 avg_tok=113
+[sim seed=2 rate= 6.0] pacer-risk99    SLO= 85.0%  goodput=3.91/s  TTFT p99=29.84s  TPOT p99=41ms  steps=1444 avg_tok=43
+[sim seed=2 rate= 7.0] pacer           SLO= 82.5%  goodput=4.30/s  TTFT p99=23.24s  TPOT p99=97ms  steps=548 avg_tok=114
+[sim seed=2 rate= 7.0] pacer-risk50    SLO= 83.0%  goodput=4.33/s  TTFT p99=23.17s  TPOT p99=100ms  steps=534 avg_tok=117
+[sim seed=2 rate= 7.0] pacer-risk80    SLO= 84.0%  goodput=4.39/s  TTFT p99=23.19s  TPOT p99=98ms  steps=541 avg_tok=115
+[sim seed=2 rate= 7.0] pacer-risk95    SLO= 82.0%  goodput=4.26/s  TTFT p99=23.25s  TPOT p99=95ms  steps=559 avg_tok=111
+[sim seed=2 rate= 7.0] pacer-risk99    SLO= 71.5%  goodput=3.25/s  TTFT p99=26.85s  TPOT p99=44ms  steps=1464 avg_tok=43
+[sim seed=2 rate= 8.0] pacer           SLO= 74.5%  goodput=3.94/s  TTFT p99=22.17s  TPOT p99=98ms  steps=531 avg_tok=117
+[sim seed=2 rate= 8.0] pacer-risk50    SLO= 74.0%  goodput=3.93/s  TTFT p99=22.11s  TPOT p99=99ms  steps=518 avg_tok=120
+[sim seed=2 rate= 8.0] pacer-risk80    SLO= 73.0%  goodput=3.87/s  TTFT p99=22.20s  TPOT p99=98ms  steps=524 avg_tok=119
+[sim seed=2 rate= 8.0] pacer-risk95    SLO= 83.0%  goodput=4.51/s  TTFT p99=22.51s  TPOT p99=96ms  steps=497 avg_tok=125
+[sim seed=2 rate= 8.0] pacer-risk99    SLO= 63.5%  goodput=2.87/s  TTFT p99=24.55s  TPOT p99=42ms  steps=1474 avg_tok=42

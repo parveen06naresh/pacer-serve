@@ -1,0 +1,30 @@
+[real seed=0 rate= 3.0] prefill-first   SLO=100.0%  goodput=2.58/s  TTFT p99=0.60s  TPOT p99=65ms  steps=4124 avg_tok=15
+[real seed=0 rate= 3.0] chunked-64      SLO=100.0%  goodput=2.58/s  TTFT p99=1.50s  TPOT p99=52ms  steps=4054 avg_tok=15
+[real seed=0 rate= 3.0] chunked-128     SLO=100.0%  goodput=2.58/s  TTFT p99=0.94s  TPOT p99=55ms  steps=4230 avg_tok=15
+[real seed=0 rate= 3.0] chunked-256     SLO=100.0%  goodput=2.59/s  TTFT p99=0.60s  TPOT p99=51ms  steps=4239 avg_tok=15
+[real seed=0 rate= 3.0] chunked-512     SLO=100.0%  goodput=2.58/s  TTFT p99=0.54s  TPOT p99=48ms  steps=4302 avg_tok=14
+[real seed=0 rate= 3.0] pacer           SLO=100.0%  goodput=2.58/s  TTFT p99=0.59s  TPOT p99=54ms  steps=4218 avg_tok=15
+[real seed=0 rate= 4.0] prefill-first   SLO= 95.0%  goodput=3.23/s  TTFT p99=0.54s  TPOT p99=137ms  steps=2653 avg_tok=23
+[real seed=0 rate= 4.0] chunked-64      SLO= 92.5%  goodput=3.14/s  TTFT p99=3.43s  TPOT p99=55ms  steps=2485 avg_tok=25
+[real seed=0 rate= 4.0] chunked-128     SLO=100.0%  goodput=3.40/s  TTFT p99=1.66s  TPOT p99=79ms  steps=2587 avg_tok=24
+[real seed=0 rate= 4.0] chunked-256     SLO= 97.5%  goodput=3.32/s  TTFT p99=0.94s  TPOT p99=106ms  steps=2768 avg_tok=22
+[real seed=0 rate= 4.0] chunked-512     SLO= 97.5%  goodput=3.32/s  TTFT p99=0.77s  TPOT p99=115ms  steps=2648 avg_tok=23
+[real seed=0 rate= 4.0] pacer           SLO=100.0%  goodput=3.41/s  TTFT p99=1.05s  TPOT p99=91ms  steps=2723 avg_tok=23
+[real seed=0 rate= 5.0] prefill-first   SLO= 82.0%  goodput=3.45/s  TTFT p99=0.55s  TPOT p99=183ms  steps=1550 avg_tok=40
+[real seed=0 rate= 5.0] chunked-64      SLO= 74.5%  goodput=3.10/s  TTFT p99=5.58s  TPOT p99=56ms  steps=1374 avg_tok=45
+[real seed=0 rate= 5.0] chunked-128     SLO= 97.0%  goodput=4.08/s  TTFT p99=3.07s  TPOT p99=95ms  steps=1580 avg_tok=39
+[real seed=0 rate= 5.0] chunked-256     SLO= 85.5%  goodput=3.59/s  TTFT p99=1.60s  TPOT p99=148ms  steps=1514 avg_tok=41
+[real seed=0 rate= 5.0] chunked-512     SLO= 84.5%  goodput=3.54/s  TTFT p99=1.05s  TPOT p99=170ms  steps=1558 avg_tok=40
+[real seed=0 rate= 5.0] pacer           SLO= 99.5%  goodput=4.18/s  TTFT p99=1.59s  TPOT p99=92ms  steps=1591 avg_tok=39
+[real seed=0 rate= 6.0] prefill-first   SLO= 12.5%  goodput=0.58/s  TTFT p99=0.56s  TPOT p99=272ms  steps=618 avg_tok=100
+[real seed=0 rate= 6.0] chunked-64      SLO= 19.5%  goodput=0.85/s  TTFT p99=7.30s  TPOT p99=55ms  steps=1198 avg_tok=52
+[real seed=0 rate= 6.0] chunked-128     SLO= 77.5%  goodput=3.82/s  TTFT p99=4.73s  TPOT p99=102ms  steps=782 avg_tok=79
+[real seed=0 rate= 6.0] chunked-256     SLO= 33.5%  goodput=1.62/s  TTFT p99=3.01s  TPOT p99=187ms  steps=589 avg_tok=105
+[real seed=0 rate= 6.0] chunked-512     SLO= 35.5%  goodput=1.75/s  TTFT p99=1.46s  TPOT p99=211ms  steps=598 avg_tok=103
+[real seed=0 rate= 6.0] pacer           SLO= 95.5%  goodput=4.75/s  TTFT p99=6.10s  TPOT p99=93ms  steps=791 avg_tok=78
+[real seed=0 rate= 7.0] prefill-first   SLO=  5.5%  goodput=0.24/s  TTFT p99=0.73s  TPOT p99=561ms  steps=476 avg_tok=130
+[real seed=0 rate= 7.0] chunked-64      SLO= 10.5%  goodput=0.45/s  TTFT p99=11.50s  TPOT p99=57ms  steps=1169 avg_tok=53
+[real seed=0 rate= 7.0] chunked-128     SLO= 21.0%  goodput=1.06/s  TTFT p99=6.07s  TPOT p99=105ms  steps=722 avg_tok=86
+[real seed=0 rate= 7.0] chunked-256     SLO=  7.0%  goodput=0.35/s  TTFT p99=4.03s  TPOT p99=190ms  steps=506 avg_tok=122
+[real seed=0 rate= 7.0] chunked-512     SLO=  7.0%  goodput=0.32/s  TTFT p99=3.96s  TPOT p99=349ms  steps=409 avg_tok=151
+[real seed=0 rate= 7.0] pacer           SLO= 87.0%  goodput=4.34/s  TTFT p99=26.13s  TPOT p99=96ms  steps=599 avg_tok=103

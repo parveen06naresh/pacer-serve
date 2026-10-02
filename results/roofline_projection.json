@@ -1,0 +1,166 @@
+{
+  "H100 SXM": {
+    "peak_tflops": 989.0,
+    "bandwidth_tbs": 3.35,
+    "ridge_flop_per_byte": 295.2238805970149,
+    "decode_only_step_ms": 7.044711622686567,
+    "free_prefill_tokens": 424,
+    "curve": [
+      {
+        "prefill_tokens": 0,
+        "step_ms": 7.044711622686567
+      },
+      {
+        "prefill_tokens": 64,
+        "step_ms": 7.044711622686567
+      },
+      {
+        "prefill_tokens": 128,
+        "step_ms": 7.044711622686567
+      },
+      {
+        "prefill_tokens": 256,
+        "step_ms": 7.044711622686567
+      },
+      {
+        "prefill_tokens": 512,
+        "step_ms": 8.290917878163802
+      },
+      {
+        "prefill_tokens": 1024,
+        "step_ms": 16.061436446543983
+      },
+      {
+        "prefill_tokens": 2048,
+        "step_ms": 31.60247358330435
+      },
+      {
+        "prefill_tokens": 4096,
+        "step_ms": 62.68454785682508
+      }
+    ]
+  },
+  "A100 80GB SXM": {
+    "peak_tflops": 312.0,
+    "bandwidth_tbs": 2.039,
+    "ridge_flop_per_byte": 153.01618440411966,
+    "decode_only_step_ms": 11.574195162334478,
+    "free_prefill_tokens": 200,
+    "curve": [
+      {
+        "prefill_tokens": 0,
+        "step_ms": 11.574195162334478
+      },
+      {
+        "prefill_tokens": 64,
+        "step_ms": 11.574195162334478
+      },
+      {
+        "prefill_tokens": 128,
+        "step_ms": 11.574195162334478
+      },
+      {
+        "prefill_tokens": 256,
+        "step_ms": 13.965372914871795
+      },
+      {
+        "prefill_tokens": 512,
+        "step_ms": 26.281146735589743
+      },
+      {
+        "prefill_tokens": 1024,
+        "step_ms": 50.912694377025645
+      },
+      {
+        "prefill_tokens": 2048,
+        "step_ms": 100.17578965989743
+      },
+      {
+        "prefill_tokens": 4096,
+        "step_ms": 198.70198022564102
+      }
+    ]
+  },
+  "L40S": {
+    "peak_tflops": 362.0,
+    "bandwidth_tbs": 0.864,
+    "ridge_flop_per_byte": 418.98148148148147,
+    "decode_only_step_ms": 27.31456474074074,
+    "free_prefill_tokens": 624,
+    "curve": [
+      {
+        "prefill_tokens": 0,
+        "step_ms": 27.31456474074074
+      },
+      {
+        "prefill_tokens": 64,
+        "step_ms": 27.31456474074074
+      },
+      {
+        "prefill_tokens": 128,
+        "step_ms": 27.31456474074074
+      },
+      {
+        "prefill_tokens": 256,
+        "step_ms": 27.31456474074074
+      },
+      {
+        "prefill_tokens": 512,
+        "step_ms": 27.31456474074074
+      },
+      {
+        "prefill_tokens": 1024,
+        "step_ms": 43.88055426970166
+      },
+      {
+        "prefill_tokens": 2048,
+        "step_ms": 86.339354624
+      },
+      {
+        "prefill_tokens": 4096,
+        "step_ms": 171.25695533259668
+      }
+    ]
+  },
+  "L4": {
+    "peak_tflops": 121.0,
+    "bandwidth_tbs": 0.3,
+    "ridge_flop_per_byte": 403.3333333333333,
+    "decode_only_step_ms": 78.66594645333333,
+    "free_prefill_tokens": 592,
+    "curve": [
+      {
+        "prefill_tokens": 0,
+        "step_ms": 78.66594645333333
+      },
+      {
+        "prefill_tokens": 64,
+        "step_ms": 78.66594645333333
+      },
+      {
+        "prefill_tokens": 128,
+        "step_ms": 78.66594645333333
+      },
+      {
+        "prefill_tokens": 256,
+        "step_ms": 78.66594645333333
+      },
+      {
+        "prefill_tokens": 512,
+        "step_ms": 78.66594645333333
+      },
+      {
+        "prefill_tokens": 1024,
+        "step_ms": 131.27901360026445
+      },
+      {
+        "prefill_tokens": 2048,
+        "step_ms": 258.3045154866777
+      },
+      {
+        "prefill_tokens": 4096,
+        "step_ms": 512.3555192595041
+      }
+    ]
+  }
+}

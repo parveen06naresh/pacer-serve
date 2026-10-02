@@ -1,0 +1,6 @@
+torch>=2.5
+numpy
+scipy
+scikit-learn
+matplotlib
+pytest
