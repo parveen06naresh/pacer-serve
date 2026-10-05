@@ -287,3 +287,7 @@ NeurIPS '21); Moore-Hodgson (Management Science, 1968). I have not found publish
 that combines online conformal risk control with model-predictive batch scheduling for
 LLM serving and evaluates it under live hardware drift; if you know of some, please open
 an issue so it can be credited.
+
+## Acknowledgements
+
+Built with AI-assisted development (Claude Code). Design decisions, experiments and results are documented in `docs/` and `results/`.

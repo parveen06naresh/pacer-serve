@@ -2,12 +2,10 @@
 
 Do the steps in this order. Steps 1 to 4 take about 15 minutes.
 
-## 1. Publish the repo first
+## 1. The repo
 
-Your GitHub link is what recruiters click. Create the empty public repo `pacer-serve`
-(github.com/new, Public, no README) and give the Claude GitHub App access to it. Then tell
-Claude "done" in the Pacer thread and the code will be pushed. Until that's done, use the
-project page link everywhere a link is asked for.
+Your GitHub link is what recruiters click: https://github.com/parveen06naresh/pacer-serve.
+Pin it on your profile and add the topics before you post.
 
 ## 2. Add it to the Projects section
 
