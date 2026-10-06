@@ -288,6 +288,4 @@ that combines online conformal risk control with model-predictive batch scheduli
 LLM serving and evaluates it under live hardware drift; if you know of some, please open
 an issue so it can be credited.
 
-## Acknowledgements
-
-Built with AI-assisted development (Claude Code). Design decisions, experiments and results are documented in `docs/` and `results/`.
+<sub>Built with AI-assisted tooling.</sub>
