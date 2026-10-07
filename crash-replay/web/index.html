@@ -73,6 +73,19 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn-ghost { background: var(--surface); border-color: var(--line); }
 .btn-ghost:hover { background: var(--surface-2); }
 .btn-lg { padding: 16px 28px; font-size: 17px; }
+.daily { margin-top: 8px; background: var(--ink); color: var(--bg); border-radius: 20px; padding: 24px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 20px; align-items: center; }
+.daily h2 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; margin-top: 8px; }
+.daily .eyebrow { color: color-mix(in srgb, var(--bg) 60%, var(--ink)); }
+.daily-text p:not(.eyebrow) { margin-top: 6px; color: color-mix(in srgb, var(--bg) 72%, var(--ink)); max-width: 40em; }
+.daily-cta { display: grid; gap: 10px; justify-items: end; }
+.daily-cta .btn-primary { background: var(--bg); color: var(--ink); }
+.daily-cta .btn-ghost { background: transparent; color: var(--bg); border-color: color-mix(in srgb, var(--bg) 30%, transparent); }
+.daily-cta .grid-emoji { font-size: clamp(15px, 4.2vw, 20px); letter-spacing: 1px; line-height: 1; white-space: nowrap; }
+a.btn { text-decoration: none; color: inherit; }
+a.btn-primary { color: var(--accent-ink); }
+.daily-cta .when { font: 500 13px/1 var(--mono); color: color-mix(in srgb, var(--bg) 60%, var(--ink)); }
+.daily-cta .row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 720px) { .daily { grid-template-columns: 1fr; padding: 20px; } .daily-cta { justify-items: start; } .daily-cta .row { justify-content: flex-start; } }
 .sub-cta { margin-top: 12px; font-size: 14px; color: var(--muted); }
 .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 .steps div { display: flex; gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; }
@@ -267,6 +280,7 @@ td:first-child { font-family: var(--font); color: var(--muted); }
         <button class="btn btn-primary btn-lg" data-play="2008">Play the 2008 crash
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
+        <a class="btn btn-ghost btn-lg" href="#daily">Today's challenge</a>
       </div>
       <p class="sub-cta">Takes about 2 minutes. No sign-up.</p>
     </div>
@@ -281,6 +295,17 @@ td:first-child { font-family: var(--font); color: var(--muted); }
       <canvas id="tapeChart" aria-hidden="true"></canvas>
     </div>
   </div>
+
+  <section class="wrap" id="daily">
+    <div class="daily">
+      <div class="daily-text">
+        <p class="eyebrow" id="dEyebrow">Daily challenge</p>
+        <h2 id="dTitle">Today's secret crash</h2>
+        <p id="dText">Everyone gets the same secret crash today. One shot. Dates stay hidden until the end.</p>
+      </div>
+      <div class="daily-cta" id="dCta"></div>
+    </div>
+  </section>
 
   <section class="block wrap" id="crashes">
     <div class="block-head"><h2>Or pick a crash</h2></div>
@@ -499,6 +524,58 @@ const S = { spx: CR.decode(CR_DATA.spx), ndq: CR.decode(CR_DATA.ndq) };
 const INDEX_NAME = { spx: "S&P 500", ndq: "Nasdaq Composite" };
 const MYSTERY = CR.mysteryWindows(S.spx, 252, 0.15, 1955);
 
+// Daily challenge: one secret window per UTC day, the same for everyone.
+const LAUNCH = Date.UTC(2026, 9, 7);
+const DAYMS = 86400000;
+function dayNumber(ms) { return Math.floor((ms - LAUNCH) / DAYMS) + 1; }
+function dailyPick(n) {
+  const h = (k) => { let x = (k * 2654435761) >>> 0; x ^= x >>> 15; x = Math.imul(x, 2246822519) >>> 0; x ^= x >>> 13; return x >>> 0; };
+  let idx = h(n) % MYSTERY.length;
+  if (n > 1 && Math.abs(idx - h(n - 1) % MYSTERY.length) < 3) idx = (idx + Math.floor(MYSTERY.length / 2)) % MYSTERY.length;
+  return MYSTERY[idx];
+}
+function todayKey() { return new Date().toISOString().slice(0, 10); }
+function untilTomorrow() {
+  const now = Date.now(), next = Math.floor(now / DAYMS + 1) * DAYMS, m = Math.ceil((next - now) / 60000);
+  return `${Math.floor(m / 60)}h ${m % 60}m`;
+}
+function movesEmoji(exp) {
+  const buckets = 12, out = [];
+  for (let b = 0; b < buckets; b++) {
+    const a = Math.floor((b * exp.length) / buckets), z = Math.max(a + 1, Math.floor(((b + 1) * exp.length) / buckets));
+    let sum = 0; for (let k = a; k < z; k++) sum += exp[k];
+    const avg = sum / (z - a);
+    out.push(avg >= 0.75 ? "🟩" : avg >= 0.25 ? "🟨" : "⬛");
+  }
+  return out.join("");
+}
+function dailyShareText(r) {
+  return `Crash Replay Daily #${r.n} 📉\nMe ${pct(r.ret)} · Market ${pct(r.hold)}\n${r.moves}` +
+    (r.trades ? `\nBeat ${Math.round(r.pct * 100)}% of random traders` : "") + (r.streak > 1 ? ` · 🔥${r.streak}` : "") +
+    (SHARE_URL ? "\n" + SHARE_URL : "");
+}
+function renderDaily() {
+  const n = dayNumber(Date.now()), r = store.get("daily:" + todayKey());
+  $("dEyebrow").textContent = `Daily challenge · #${n}`;
+  const cta = $("dCta");
+  if (r) {
+    $("dTitle").textContent = r.ret > r.hold ? `You beat the market today: ${pct(r.ret)}` : `Today: ${pct(r.ret)} vs the market's ${pct(r.hold)}`;
+    $("dText").textContent = `It was ${r.reveal}. Share your result and dare your friends.`;
+    cta.innerHTML = `<div class="grid-emoji" aria-label="Your positions month by month">${r.moves}</div>
+      <div class="row"><button class="btn btn-primary" id="dShare">Copy my result</button><button class="btn btn-ghost" data-play="mystery">Random crash</button></div>
+      <span class="when">Next challenge in ${untilTomorrow()}</span>`;
+    $("dShare").onclick = async () => {
+      const text = dailyShareText(r);
+      try { await navigator.clipboard.writeText(text); toast("Copied. Paste it anywhere."); }
+      catch (e) { toast("Copy isn't available here"); }
+    };
+  } else {
+    $("dTitle").textContent = "Today's secret crash";
+    $("dText").textContent = "Everyone gets the same secret crash today. One shot. Dates stay hidden until the end.";
+    cta.innerHTML = `<button class="btn btn-primary btn-lg" data-play="daily">Play challenge #${n}</button><span class="when">New one in ${untilTomorrow()}</span>`;
+  }
+}
+
 // ---------------------------------------------------------------- helpers
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const money = (v) => "$" + Math.round(v).toLocaleString("en-US");
@@ -641,6 +718,7 @@ function sparkline(c, s, i0, i1) {
 }
 
 function renderCards() {
+  renderDaily();
   const host = $("cards");
   host.innerHTML = "";
   for (const sc of SCENARIOS) {
@@ -709,7 +787,14 @@ function show(view) {
 
 function startGame(id) {
   let sc, s, i0, i1, mystery = false;
-  if (id === "mystery") {
+  if (id === "daily" && store.get("daily:" + todayKey())) id = "mystery";
+  if (id === "daily") {
+    mystery = true;
+    s = S.spx;
+    const n = dayNumber(Date.now());
+    i0 = dailyPick(n); i1 = i0 + 252;
+    sc = { id: "daily", name: `Daily Challenge #${n}`, ix: "spx", news: [], n, key: todayKey() };
+  } else if (id === "mystery") {
     mystery = true;
     s = S.spx;
     let seed = Date.now() % MYSTERY.length;
@@ -731,7 +816,7 @@ function startGame(id) {
     if (k >= 0 && k <= i1 - i0) news.set(k, { d: s.t[i0 + k], text });
   }
   Object.assign(G, { sc, s, i0, i1, m: i1 - i0, ret, quant, hold, news, mystery,
-    k: 0, acc: 0, playing: false, pauseUntil: 0, player: new CR.Book(1), marks: [],
+    k: 0, acc: 0, playing: false, pauseUntil: 0, player: new CR.Book(1), marks: [], exp: [],
     lo: null, hi: null, last: 0 });
   $("gIndex").textContent = mystery ? "S&P 500 · dates hidden" : INDEX_NAME[sc.ix];
   $("gName").textContent = sc.name;
@@ -766,6 +851,7 @@ function setPosition(e, silent) {
 
 function advance() {
   if (G.k >= G.m) return;
+  G.exp.push(G.player.exposure);
   G.player.step(G.ret.mkt[G.k], G.ret.cash[G.k]);
   G.k++;
   const ev = G.news.get(G.k);
@@ -871,7 +957,7 @@ function finish() {
     : beatQuant ? "The market won, but you beat the quant."
     : p.trades === 0 ? "You held through everything." : "The market beat you this time.";
   $("rTitle").textContent = title;
-  const label = G.mystery ? "Mystery Crash" : G.sc.name;
+  const label = G.sc.id === "mystery" ? "Mystery Crash" : G.sc.name;
   $("rEyebrow").textContent = label + (isBest && best ? " · New personal best" : "");
   $("rSub").textContent = `$10,000 became ${money(you.final)}.` + (p.trades
     ? ` Your timing beat ${Math.round(skill.pct * 100)}% of random traders.`
@@ -904,8 +990,20 @@ function finish() {
   }
 
   const tag = G.mystery ? "a mystery crash" : "the " + G.sc.name;
-  $("brag").value = `I played ${tag} on Crash Replay with real market data: $10,000 → ${money(you.final)} (${pct(you.ret)}). Buy and hold: ${pct(hold.ret)}.` +
+  if (G.sc.id === "daily" && !store.get("daily:" + G.sc.key)) {
+    const st = store.get("streak") || {};
+    const yday = new Date(Date.parse(G.sc.key) - DAYMS).toISOString().slice(0, 10);
+    const streak = st.last === yday ? (st.n || 0) + 1 : 1;
+    store.set("streak", { last: G.sc.key, n: streak });
+    const r = { n: G.sc.n, ret: you.ret, hold: hold.ret, quant: quant.ret, pct: skill.pct, trades: p.trades, moves: movesEmoji(G.exp), streak,
+      reveal: `the S&P 500, ${fmtDate(G.s.t[G.i0])} to ${fmtDate(G.s.t[G.i1])}` };
+    store.set("daily:" + G.sc.key, r);
+    G.dailyResult = r;
+  } else G.dailyResult = null;
+  if (G.dailyResult) $("brag").value = dailyShareText(G.dailyResult);
+  else $("brag").value = `I played ${tag} on Crash Replay with real market data: $10,000 → ${money(you.final)} (${pct(you.ret)}). Buy and hold: ${pct(hold.ret)}.` +
     (p.trades ? ` I beat ${Math.round(skill.pct * 100)}% of random traders.` : "") + ` Can you beat me?` + (SHARE_URL ? " " + SHARE_URL : "");
+  $("againBtn").textContent = G.sc.id === "daily" ? "Play a random crash" : "Play again";
   $("rDetails").open = false;
   show("results");
   requestAnimationFrame(drawResults);
@@ -1036,7 +1134,7 @@ $("playBtn").onclick = () => { if (G.k < G.m) setPlaying(!G.playing); };
 function stepDay() { setPlaying(false); $("startOverlay").hidden = true; advance(); renderGame(); }
 $("quitBtn").onclick = () => { setPlaying(false); renderCards(); show("home"); };
 $("homeBtn").onclick = () => { if (G.playing) setPlaying(false); renderCards(); show("home"); };
-$("againBtn").onclick = () => startGame(G.sc.id);
+$("againBtn").onclick = () => startGame(G.sc.id === "daily" ? "mystery" : G.sc.id);
 $("otherBtn").onclick = () => { renderCards(); show("home"); setTimeout(() => $("crashes").scrollIntoView({ behavior: reduced ? "auto" : "smooth" }), 30); };
 $("copyBtn").onclick = async () => {
   const text = $("brag").value;
@@ -1071,10 +1169,11 @@ matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => wind
 new MutationObserver(() => window.dispatchEvent(new Event("resize"))).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
 renderCards();
+setInterval(() => { if (!$("home").hidden) renderDaily(); }, 30000);
 initTape();
 requestAnimationFrame(loop);
 const deep = (location.hash || "").slice(1);
-if (deep && (deep === "mystery" || SCENARIOS.some((x) => x.id === deep))) startGame(deep);
+if (deep && (deep === "mystery" || deep === "daily" || SCENARIOS.some((x) => x.id === deep))) startGame(deep);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.dispatchEvent(new Event("resize")));
 })();
 </script>
