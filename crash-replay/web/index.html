@@ -1,0 +1,1103 @@
+<title>Crash Replay</title>
+<meta name="description" content="Relive the biggest stock market crashes with $10,000 and real prices. Sell, hold or buy the dip, then see if you beat the market and a quant.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: a market terminal with product polish. One focused column, the
+   chart is the hero, numbers are set in mono so the tape feels alive. */
+:root {
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #eef0f4;
+  --ink: #0b1220;
+  --muted: #5a6376;
+  --line: #e1e5ec;
+  --accent: #1f5bff;
+  --accent-ink: #ffffff;
+  --accent-soft: rgba(31, 91, 255, .10);
+  --up: #0a9a68;
+  --down: #e0353a;
+  --down-soft: rgba(224, 53, 58, .10);
+  --hold: #8a93a6;
+  --quant: #d98a00;
+  --shadow: 0 1px 2px rgba(11, 18, 32, .04), 0 8px 24px rgba(11, 18, 32, .06);
+  --font: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --r: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #090c12; --surface: #11161f; --surface-2: #19202c; --ink: #e8ecf4; --muted: #8d97ab;
+    --line: #222a38; --accent: #5b8cff; --accent-ink: #06122e; --accent-soft: rgba(91, 140, 255, .14);
+    --up: #2bd19a; --down: #ff5c61; --down-soft: rgba(255, 92, 97, .12); --hold: #7c869b; --quant: #f5b83d;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #090c12; --surface: #11161f; --surface-2: #19202c; --ink: #e8ecf4; --muted: #8d97ab;
+  --line: #222a38; --accent: #5b8cff; --accent-ink: #06122e; --accent-soft: rgba(91, 140, 255, .14);
+  --up: #2bd19a; --down: #ff5c61; --down-soft: rgba(255, 92, 97, .12); --hold: #7c869b; --quant: #f5b83d;
+  --shadow: 0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.35); color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { background: var(--bg); }
+body { color: var(--ink); font: 400 16px/1.55 var(--font); -webkit-font-smoothing: antialiased; }
+.wrap { max-width: 1160px; margin: 0 auto; padding-inline: 20px; }
+@media (max-width: 480px) { .wrap { padding-inline: 16px; } }
+h1, h2, h3 { text-wrap: balance; margin: 0; letter-spacing: -.02em; }
+p { margin: 0; }
+.num, .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.up { color: var(--up); } .down { color: var(--down); }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+.eyebrow { font: 600 12px/1 var(--mono); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+
+/* nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: saturate(1.4) blur(12px); border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; gap: 16px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.02em; background: none; border: 0; padding: 0; font-size: 17px; }
+.brand svg { display: block; }
+.nav-links { display: flex; gap: 4px; }
+.nav-links a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 12px; border-radius: 999px; }
+.nav-links a:hover { color: var(--ink); background: var(--surface-2); }
+@media (max-width: 560px) { .nav-links a.opt { display: none; } }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border-radius: 999px; padding: 12px 20px; font-weight: 600; font-size: 15px; border: 1px solid transparent; transition: transform .12s ease, background .2s ease; white-space: nowrap; }
+.btn:active { transform: scale(.98); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
+.btn-ghost { background: var(--surface); border-color: var(--line); }
+.btn-ghost:hover { background: var(--surface-2); }
+
+/* hero */
+.hero { padding-block: 56px 32px; display: grid; grid-template-columns: 1.02fr 1fr; gap: 48px; align-items: center; }
+.hero > * { min-width: 0; }
+.hero h1 { font-size: clamp(40px, 6vw, 68px); line-height: 1.02; font-weight: 800; letter-spacing: -.045em; }
+.hero h1 em { font-style: normal; color: var(--down); }
+.eyebrow + h1 { margin-top: 14px; }
+.hero .lede { margin-top: 20px; font-size: 18px; color: var(--muted); max-width: 34em; }
+.hero .ctas { margin-top: 28px; display: flex; gap: 12px; flex-wrap: wrap; }
+.hero .proof { margin-top: 28px; display: flex; gap: 28px; flex-wrap: wrap; }
+.proof div { display: grid; gap: 2px; }
+.proof b { font: 600 22px/1 var(--mono); letter-spacing: -.02em; }
+.proof span { font-size: 13px; color: var(--muted); }
+.tape { background: var(--surface); border: 1px solid var(--line); border-radius: 20px; box-shadow: var(--shadow); padding: 18px 18px 10px; position: relative; overflow: hidden; }
+.tape-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.tape-date { font: 600 30px/1 var(--mono); letter-spacing: -.03em; }
+.tape-dd { font: 600 16px/1 var(--mono); }
+.tape-sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+.tape canvas { width: 100%; height: 260px; display: block; margin-top: 10px; }
+.live-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--down); margin-right: 8px; vertical-align: 2px; animation: pulse 1.6s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .3 } }
+@media (max-width: 880px) { .hero { grid-template-columns: 1fr; gap: 32px; padding-block: 36px 24px; } }
+
+/* sections */
+section.block { padding-block: 40px; }
+.block-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.block-head h2 { font-size: clamp(26px, 3.4vw, 34px); font-weight: 700; }
+.block-head p { color: var(--muted); max-width: 40em; margin-top: 6px; }
+
+/* scenario cards */
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 920px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
+.card { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 12px; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; min-width: 0; }
+.card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
+.card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tag { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); padding: 6px 8px; border-radius: 6px; }
+.tag.hot { color: var(--down); background: var(--down-soft); }
+.card h3 { font-size: 21px; font-weight: 700; }
+.card .yrs { font: 500 13px/1 var(--mono); color: var(--muted); margin-top: 6px; }
+.card .blurb { font-size: 14px; color: var(--muted); margin-top: 6px; }
+.card.mystery .blurb { color: color-mix(in srgb, var(--bg) 65%, var(--ink)); }
+.card canvas { width: 100%; height: 64px; display: block; }
+.card-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; }
+.card-stats div { display: grid; gap: 2px; min-width: 0; }
+.card-stats b { font: 600 15px/1.1 var(--mono); }
+.card-stats span { font-size: 12px; color: var(--muted); }
+.card.mystery { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.card.mystery .tag { background: rgba(127,127,127,.2); color: inherit; }
+.card.mystery .yrs, .card.mystery .card-stats span { color: color-mix(in srgb, var(--bg) 65%, var(--ink)); }
+.card.mystery .card-stats { border-top-color: rgba(127,127,127,.3); }
+.qmark { height: 64px; display: flex; align-items: center; font: 700 44px/1 var(--mono); letter-spacing: .3em; opacity: .9; }
+
+/* how it works */
+.how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 860px) { .how { grid-template-columns: 1fr; } }
+.how article { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 22px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.how h3 { font-size: 18px; }
+.how p:not(.eyebrow) { color: var(--muted); font-size: 15px; }
+.formula { font: 500 12px/1.6 var(--mono); background: var(--surface-2); border-radius: 10px; padding: 12px 14px; overflow-x: auto; white-space: pre; color: var(--ink); }
+.legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+footer { border-top: 1px solid var(--line); margin-top: 40px; padding-block: 28px 40px; color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+footer a { color: var(--ink); }
+
+/* game */
+.game { padding-block: 20px 40px; }
+.game-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.game-title { display: grid; gap: 4px; min-width: 0; }
+.game-title h2 { font-size: 22px; font-weight: 700; }
+.controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.icon-btn { width: 42px; height: 42px; border-radius: 999px; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line); }
+.icon-btn:hover { background: var(--surface-2); }
+.speed { display: flex; background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 3px; }
+.speed button { border: 0; background: none; padding: 7px 12px; border-radius: 999px; font: 600 13px/1 var(--mono); color: var(--muted); }
+.speed button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.progress { height: 4px; background: var(--line); border-radius: 4px; margin-top: 16px; overflow: hidden; }
+.progress i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 4px; }
+
+.board { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; margin-top: 16px; }
+@media (max-width: 920px) {
+  .board { grid-template-columns: 1fr; }
+  .game { padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
+  .pos { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 30; box-shadow: var(--shadow); border: 1px solid var(--line); background: color-mix(in srgb, var(--surface-2) 92%, transparent); backdrop-filter: blur(10px); }
+  #game[hidden] .pos { display: none; }
+}
+@media (max-width: 600px) { #chart { height: 300px; } .news { top: auto; bottom: 44px; } .news div { font-size: 14px; } }
+.chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; position: relative; min-width: 0; }
+.ticker { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.ticker .date { font: 600 clamp(28px, 4vw, 40px)/1 var(--mono); letter-spacing: -.04em; }
+.ticker .lvl { font: 500 18px/1 var(--mono); }
+.ticker .chg { font: 600 16px/1 var(--mono); }
+.ticker .dd { margin-left: auto; font: 600 13px/1 var(--mono); padding: 7px 10px; border-radius: 999px; background: var(--down-soft); color: var(--down); }
+#chart { width: 100%; height: clamp(260px, 44vh, 440px); display: block; margin-top: 12px; touch-action: manipulation; }
+.news { position: absolute; left: 18px; right: 18px; top: 74px; display: flex; justify-content: center; pointer-events: none; }
+.news div { background: var(--ink); color: var(--bg); padding: 10px 16px; border-radius: 12px; font-weight: 600; font-size: 15px; box-shadow: var(--shadow); max-width: 560px; text-align: center; opacity: 0; transform: translateY(-6px); transition: opacity .25s ease, transform .25s ease; }
+.news div.show { opacity: 1; transform: none; }
+.news small { display: block; font: 500 11px/1.4 var(--mono); letter-spacing: .1em; text-transform: uppercase; opacity: .7; margin-bottom: 2px; }
+.start-overlay { position: absolute; inset: 0; display: grid; place-items: center; background: color-mix(in srgb, var(--surface) 70%, transparent); backdrop-filter: blur(2px); border-radius: 18px; }
+.start-overlay > div { text-align: center; display: grid; gap: 14px; justify-items: center; padding: 20px; max-width: 420px; }
+.start-overlay p { color: var(--muted); }
+.kbd { font: 500 12px/1 var(--mono); border: 1px solid var(--line); border-bottom-width: 2px; border-radius: 6px; padding: 3px 6px; background: var(--surface); }
+
+.side { display: grid; gap: 16px; align-content: start; min-width: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.big-val { font: 600 34px/1 var(--mono); letter-spacing: -.04em; }
+.pos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; background: var(--surface-2); padding: 5px; border-radius: 14px; }
+.pos button { border: 0; background: none; border-radius: 10px; padding: 12px 4px; display: grid; gap: 4px; justify-items: center; font-weight: 600; font-size: 14px; color: var(--muted); }
+.pos button small { font: 500 11px/1 var(--mono); opacity: .8; }
+.pos button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+.pos button[aria-pressed="true"][data-e="0"] { color: var(--down); }
+.pos button[aria-pressed="true"][data-e="1"] { color: var(--up); }
+.hint { font-size: 12px; color: var(--muted); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.race { display: grid; gap: 12px; }
+.racer { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: baseline; }
+.racer .who { font-size: 14px; font-weight: 600; display: flex; align-items: center; min-width: 0; }
+.racer .v { font: 600 15px/1 var(--mono); }
+.racer .bar { grid-column: 1 / -1; height: 6px; background: var(--surface-2); border-radius: 6px; overflow: hidden; }
+.racer .bar i { display: block; height: 100%; border-radius: 6px; transition: width .2s ease; }
+.racer .meta { grid-column: 1 / -1; font: 500 12px/1 var(--mono); color: var(--muted); }
+
+/* results */
+.verdict { padding-block: 32px 8px; display: grid; gap: 12px; }
+.verdict h1 { font-size: clamp(34px, 5.4vw, 60px); font-weight: 800; letter-spacing: -.045em; line-height: 1.03; }
+.verdict p:not(.eyebrow) { font-size: 18px; color: var(--muted); max-width: 44em; }
+.res-grid { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; margin-top: 20px; }
+@media (max-width: 920px) { .res-grid { grid-template-columns: 1fr; } }
+#eqChart, #histChart { width: 100%; display: block; }
+#eqChart { height: 300px; } #histChart { height: 170px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 13px; color: var(--muted); }
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 10px 8px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+td { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+td:first-child { font-family: var(--font); color: var(--muted); }
+.skill-big { font: 700 44px/1 var(--mono); letter-spacing: -.04em; }
+.share-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px); background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 12px; font-weight: 600; font-size: 14px; opacity: 0; transition: .25s ease; pointer-events: none; z-index: 50; max-width: calc(100vw - 32px); }
+.toast.show { opacity: 1; transform: translateX(-50%); }
+.reveal { background: var(--accent-soft); border-radius: 14px; padding: 16px 18px; font-weight: 600; }
+.copybox { width: 100%; font: 13px/1.5 var(--mono); border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 10px; padding: 10px; resize: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+
+<header class="nav">
+  <div class="wrap">
+    <button class="brand" id="homeBtn" aria-label="Crash Replay home">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8" fill="var(--ink)"/><path d="M5 9 L10 12 L13 10 L17 19 L20 16 L23 18" fill="none" stroke="var(--bg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/><circle cx="23" cy="18" r="2.2" fill="var(--down)"/></svg>
+      Crash Replay
+    </button>
+    <nav class="nav-links">
+      <a href="#crashes">Crashes</a>
+      <a href="#how" class="opt">How it works</a>
+      <a href="https://github.com/parveen06naresh" target="_blank" rel="noopener" class="opt">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main id="home">
+  <div class="wrap hero">
+    <div>
+      <p class="eyebrow">Real prices · Real crashes · No hindsight</p>
+      <h1>The crash is coming.<br><em>Do you sell?</em></h1>
+      <p class="lede">Relive the worst markets in history one day at a time with $10,000. Sell, hold or buy the dip. Then see if you beat the market, a professional quant strategy and 2,000 random traders.</p>
+      <div class="ctas">
+        <button class="btn btn-primary" data-play="2008">Play the 2008 crash
+          <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="btn btn-ghost" data-play="mystery">Mystery crash</button>
+      </div>
+      <div class="proof">
+        <div><b class="num" id="pDays">—</b><span>trading days of data</span></div>
+        <div><b class="num">1950</b><span>S&amp;P 500 history from</span></div>
+        <div><b class="num" id="pWorst">—</b><span>worst single day</span></div>
+      </div>
+    </div>
+    <div class="tape" aria-label="The S&amp;P 500 during the 2008 financial crisis">
+      <div class="tape-head">
+        <div>
+          <div class="eyebrow"><span class="live-dot"></span>Replaying · S&amp;P 500</div>
+          <div class="tape-date" id="tapeDate" style="margin-top:10px">2009-03-09</div>
+        </div>
+        <div style="text-align:right">
+          <div class="tape-dd down" id="tapeDD">−56.8%</div>
+          <div class="tape-sub">from the peak</div>
+        </div>
+      </div>
+      <canvas id="tapeChart" aria-hidden="true"></canvas>
+    </div>
+  </div>
+
+  <section class="block wrap" id="crashes">
+    <div class="block-head">
+      <div>
+        <h2>Pick your crash</h2>
+        <p>Every chart is real daily index data. Your $10,000 starts fully invested a few months before the top.</p>
+      </div>
+    </div>
+    <div class="grid" id="cards"></div>
+  </section>
+
+  <section class="block wrap" id="how">
+    <div class="block-head">
+      <div>
+        <h2>How it works</h2>
+        <p>Built like a real backtest, so your score means something.</p>
+      </div>
+    </div>
+    <div class="how">
+      <article>
+        <p class="eyebrow">01 · The rules</p>
+        <h3>No peeking at tomorrow</h3>
+        <p>You decide at each day's close and earn the next day's move. Each trade costs 0.05%. Cash earns the 3-month Treasury bill rate of the day, and S&amp;P 500 positions earn dividends.</p>
+        <div class="formula">V(t+1) = V(t) · (1 + e·r_mkt + (1−e)·r_cash)
+e ∈ {0, ½, 1}   cost = 5 bp · |Δe| · V</div>
+      </article>
+      <article>
+        <p class="eyebrow">02 · Your opponents</p>
+        <h3>The market and the quant</h3>
+        <p><span class="legend-dot" style="background:var(--hold)"></span>Buy and hold never trades. <span class="legend-dot" style="background:var(--quant)"></span>The quant runs the two rules trend-following funds use: stay invested only above the 200-day average, and size the bet to target 15% volatility.</p>
+        <div class="formula">size = 1[P &gt; SMA200] · min(1, 15% / σ20)
+σ20 = stdev(20 daily log returns) · √252</div>
+      </article>
+      <article>
+        <p class="eyebrow">03 · The skill test</p>
+        <h3>Was it skill or luck?</h3>
+        <p>2,000 random traders make exactly as many trades as you, on random days. If you beat 95% of them, your timing was better than chance. That is a permutation test, the same idea used to check trading strategies.</p>
+        <div class="formula">p-value ≈ share of random traders
+          who finished above you</div>
+      </article>
+    </div>
+  </section>
+</main>
+
+<main id="game" class="wrap game" hidden>
+  <div class="game-bar">
+    <div class="game-title">
+      <p class="eyebrow" id="gIndex">S&amp;P 500</p>
+      <h2 id="gName">2008 Financial Crisis</h2>
+    </div>
+    <div class="controls">
+      <button class="icon-btn" id="playBtn" aria-label="Pause"></button>
+      <button class="icon-btn" id="stepBtn" aria-label="Next day">
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3l6 5-6 5V3zM12 3v10" stroke="currentColor" stroke-width="1.8" fill="currentColor" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="speed" role="group" aria-label="Speed">
+        <button data-speed="1" aria-pressed="false">1×</button>
+        <button data-speed="2" aria-pressed="true">2×</button>
+        <button data-speed="4" aria-pressed="false">4×</button>
+      </div>
+      <button class="btn btn-ghost" id="quitBtn" style="padding:10px 16px">Quit</button>
+    </div>
+  </div>
+  <div class="progress"><i id="prog"></i></div>
+
+  <div class="board">
+    <div class="chart-card">
+      <div class="ticker">
+        <span class="date" id="tDate">—</span>
+        <span class="lvl" id="tLvl">—</span>
+        <span class="chg" id="tChg">—</span>
+        <span class="dd" id="tDD">−0.0% from peak</span>
+      </div>
+      <canvas id="chart" aria-label="Index price so far"></canvas>
+      <div class="news" aria-live="polite"><div id="news"><small id="newsDate"></small><span id="newsText"></span></div></div>
+      <div class="start-overlay" id="startOverlay">
+        <div>
+          <p class="eyebrow" id="soEyebrow">Day 1</p>
+          <h2 style="font-size:26px" id="soTitle">You have $10,000, fully invested.</h2>
+          <p id="soText">The market moves one day at a time. Change your position whenever you like.</p>
+          <button class="btn btn-primary" id="beginBtn">Start the clock</button>
+          <p class="hint"><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span> position · <span class="kbd">Space</span> pause · <span class="kbd">→</span> next day</p>
+        </div>
+      </div>
+    </div>
+
+    <aside class="side">
+      <div class="panel">
+        <div>
+          <p class="eyebrow">Your portfolio</p>
+          <div class="big-val" id="yVal" style="margin-top:8px">$10,000</div>
+          <div class="num" id="yRet" style="margin-top:6px;font-size:14px">+0.0%</div>
+        </div>
+        <div class="pos" role="group" aria-label="Your position">
+          <button data-e="0" aria-pressed="false">Cash<small>0%</small></button>
+          <button data-e="0.5" aria-pressed="false">Half<small>50%</small></button>
+          <button data-e="1" aria-pressed="true">All in<small>100%</small></button>
+        </div>
+        <p class="hint" id="tradeHint">0 trades · 0.05% per trade</p>
+      </div>
+      <div class="panel">
+        <p class="eyebrow">The race</p>
+        <div class="race" id="race"></div>
+      </div>
+    </aside>
+  </div>
+</main>
+
+<main id="results" class="wrap" hidden>
+  <div class="verdict">
+    <p class="eyebrow" id="rEyebrow">2008 Financial Crisis · Final</p>
+    <h1 id="rTitle">You beat the market.</h1>
+    <p id="rSub"></p>
+    <div class="reveal" id="rReveal" hidden></div>
+  </div>
+  <div class="res-grid">
+    <div class="chart-card" style="display:grid;gap:12px">
+      <div class="legend">
+        <span><span class="legend-dot" style="background:var(--accent)"></span>You</span>
+        <span><span class="legend-dot" style="background:var(--hold)"></span>Buy and hold</span>
+        <span><span class="legend-dot" style="background:var(--quant)"></span>The quant</span>
+      </div>
+      <canvas id="eqChart" aria-label="Portfolio value over time"></canvas>
+      <div class="tbl">
+        <table>
+          <thead><tr><th></th><th>You</th><th>Hold</th><th>Quant</th></tr></thead>
+          <tbody id="rTable"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="side">
+      <div class="panel">
+        <p class="eyebrow">Skill test</p>
+        <div class="skill-big" id="rSkill">—</div>
+        <p id="rSkillText" style="color:var(--muted);font-size:14px"></p>
+        <canvas id="histChart" aria-label="Final values of 2,000 random traders"></canvas>
+      </div>
+      <div class="panel">
+        <p class="eyebrow">Challenge a friend</p>
+        <textarea class="copybox" id="brag" rows="4" readonly aria-label="Share text"></textarea>
+        <div class="share-row">
+          <button class="btn btn-primary" id="copyBtn">Copy</button>
+          <button class="btn btn-ghost" id="cardBtn">Save score card</button>
+        </div>
+      </div>
+      <div class="share-row">
+        <button class="btn btn-ghost" id="againBtn">Play again</button>
+        <button class="btn btn-ghost" id="otherBtn">Try another crash</button>
+      </div>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>A student project by <a href="https://github.com/parveen06naresh" target="_blank" rel="noopener">Parveen Kumar Naresh Kumar</a>. For learning, not investment advice.</span>
+    <span>Data: Yahoo Finance index history · FRED, Federal Reserve Bank of St. Louis · Robert Shiller</span>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status"></div>
+
+<!--DATA-->
+<script src="data.js"></script>
+<script src="engine.js"></script>
+<!--/DATA-->
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const SHARE_URL = "https://claude.ai/artifact/A8HZGHWtTNp1V6zXCYPqxK";
+
+// ---------------------------------------------------------------- scenarios
+const SCENARIOS = [
+  { id: "2008", name: "2008 Financial Crisis", ix: "spx", from: "2007-06-01", to: "2009-12-31", tag: "Classic",
+    blurb: "Subprime loans blow up the banks.",
+    news: [
+      ["2007-08-09", "BNP Paribas freezes funds exposed to US subprime mortgages."],
+      ["2007-10-09", "The S&P 500 closes at a record 1,565."],
+      ["2008-03-17", "JPMorgan agrees to buy Bear Stearns in a Fed-backed rescue."],
+      ["2008-09-08", "The government takes over Fannie Mae and Freddie Mac."],
+      ["2008-09-15", "Lehman Brothers files for bankruptcy."],
+      ["2008-09-16", "The Fed rescues AIG with an $85 billion loan."],
+      ["2008-09-29", "The House rejects the bank bailout. The S&P 500 falls 8.8%."],
+      ["2008-10-03", "Congress passes the $700 billion bank bailout."],
+      ["2008-11-25", "The Fed starts buying mortgage bonds to support the economy."],
+      ["2009-03-09", "The S&P 500 closes at 677, down 57% from its peak."],
+      ["2009-03-18", "The Fed expands its bond buying past $1 trillion."],
+    ] },
+  { id: "1987", name: "Black Monday", ix: "spx", from: "1987-06-01", to: "1988-03-31", tag: "Fastest",
+    blurb: "The biggest one-day fall ever.",
+    news: [
+      ["1987-08-25", "The S&P 500 closes at a record 337."],
+      ["1987-10-14", "A bigger than expected trade deficit hits stocks."],
+      ["1987-10-16", "Stocks fall 5.2% on Friday. A long weekend of worry begins."],
+      ["1987-10-19", "Black Monday. The S&P 500 falls 20.5% in a single day."],
+      ["1987-10-20", "The Fed says it is ready to supply liquidity to the system."],
+    ] },
+  { id: "2000", name: "Dot-com Bust", ix: "ndq", from: "1999-10-01", to: "2002-12-31", tag: "Longest",
+    blurb: "Internet stocks lose almost 80%.",
+    news: [
+      ["2000-03-10", "The Nasdaq closes at a record 5,049."],
+      ["2000-04-14", "The Nasdaq falls 9.7% in one day."],
+      ["2001-01-03", "The Fed cuts rates by surprise. The Nasdaq jumps 14%."],
+      ["2001-09-17", "Markets reopen after the September 11 attacks."],
+      ["2001-12-03", "Enron files for bankruptcy."],
+      ["2002-07-22", "WorldCom files for the largest bankruptcy in US history."],
+      ["2002-10-09", "The Nasdaq closes at 1,114, down 78% from its peak."],
+    ] },
+  { id: "2020", name: "COVID Crash", ix: "spx", from: "2019-12-02", to: "2020-12-31", tag: "Sharpest rebound",
+    blurb: "A 34% fall in 23 trading days.",
+    news: [
+      ["2020-02-19", "The S&P 500 closes at a record high."],
+      ["2020-02-24", "Cases surge in Italy. The S&P 500 falls 3.4%."],
+      ["2020-03-03", "The Fed makes an emergency half-point rate cut."],
+      ["2020-03-09", "Oil prices crash. Trading halts as the S&P 500 falls 7.6%."],
+      ["2020-03-11", "The WHO declares COVID-19 a pandemic."],
+      ["2020-03-16", "The Fed cuts rates to zero. The S&P 500 falls 12%."],
+      ["2020-03-23", "The Fed pledges unlimited bond buying."],
+      ["2020-03-27", "The $2.2 trillion CARES Act is signed into law."],
+      ["2020-11-09", "Pfizer says its vaccine is more than 90% effective."],
+    ] },
+  { id: "2022", name: "Rate Shock", ix: "ndq", from: "2021-09-01", to: "2023-06-30", tag: "Slow burn",
+    blurb: "Inflation hits 9% and the Fed slams the brakes.",
+    news: [
+      ["2021-11-19", "The Nasdaq closes at a record 16,057."],
+      ["2022-01-05", "Fed minutes point to faster rate hikes. The Nasdaq falls 3.3%."],
+      ["2022-03-16", "The Fed raises rates for the first time since 2018."],
+      ["2022-05-04", "The Fed raises rates by half a point."],
+      ["2022-06-13", "Inflation hits 8.6%. The S&P 500 enters a bear market."],
+      ["2022-06-15", "The Fed hikes by 0.75 point, the most since 1994."],
+      ["2022-11-10", "Inflation cools. The Nasdaq jumps 7.4%."],
+      ["2023-03-10", "Silicon Valley Bank collapses."],
+    ] },
+];
+
+const S = { spx: CR.decode(CR_DATA.spx), ndq: CR.decode(CR_DATA.ndq) };
+const INDEX_NAME = { spx: "S&P 500", ndq: "Nasdaq Composite" };
+const MYSTERY = CR.mysteryWindows(S.spx, 252, 0.15, 1955);
+
+// ---------------------------------------------------------------- helpers
+const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+const money = (v) => "$" + Math.round(v).toLocaleString("en-US");
+const pct = (x, d = 1) => (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(d) + "%";
+const sign = (x) => (x >= 0 ? "up" : "down");
+const fmtDate = (ms) => new Date(ms).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" });
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem("cr:" + k)); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem("cr:" + k, JSON.stringify(v)); } catch (e) { /* storage off */ } },
+};
+function toast(msg) {
+  const t = $("toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toast.h); toast.h = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+function setupCanvas(c) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = c.clientWidth, h = c.clientHeight;
+  if (c.width !== Math.round(w * dpr) || c.height !== Math.round(h * dpr)) {
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+  }
+  const g = c.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, w, h);
+  return { g, w, h };
+}
+
+function niceTicks(lo, hi, count) {
+  const span = hi - lo, step0 = span / count;
+  const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+  const step = [1, 2, 2.5, 5, 10].map((m) => m * mag).find((s) => span / s <= count) || 10 * mag;
+  const out = [];
+  for (let v = Math.ceil(lo / step) * step; v <= hi + 1e-9; v += step) out.push(v);
+  return out;
+}
+
+function fmtLevel(v) {
+  return v >= 1000 ? Math.round(v).toLocaleString("en-US") : v.toFixed(v >= 100 ? 0 : 1);
+}
+
+// Draws a price or value line. opts: {lines:[{ys,color,width,fill}], n (x slots),
+// lo, hi, yFmt, xLabels:[[k,label]], markers:[{k,y,dir,color}], pins:[k], peak}
+function drawLines(c, o) {
+  const { g, w, h } = setupCanvas(c);
+  const padL = 6, padR = o.yFmt ? 58 : 6, padT = 10, padB = o.xLabels ? 24 : 6;
+  const W = w - padL - padR, H = h - padT - padB;
+  const x = (k) => padL + (o.n <= 1 ? 0 : (k / (o.n - 1)) * W);
+  const y = (v) => padT + (1 - (v - o.lo) / (o.hi - o.lo)) * H;
+  const muted = css("--muted"), line = css("--line");
+  g.font = "500 11px " + css("--mono");
+  if (o.yFmt) {
+    g.textAlign = "left"; g.textBaseline = "middle";
+    for (const v of niceTicks(o.lo, o.hi, 4)) {
+      const yy = Math.round(y(v)) + 0.5;
+      g.strokeStyle = line; g.lineWidth = 1; g.beginPath(); g.moveTo(padL, yy); g.lineTo(padL + W, yy); g.stroke();
+      g.fillStyle = muted; g.fillText(o.yFmt(v), padL + W + 8, yy);
+    }
+  }
+  if (o.xLabels) {
+    g.textAlign = "center"; g.textBaseline = "alphabetic"; g.fillStyle = muted;
+    let lastX = -1e9;
+    for (const [k, label] of o.xLabels) {
+      const xx = x(k);
+      if (xx - lastX < 56 || xx < padL + 16 || xx > padL + W - 16) continue;
+      g.fillText(label, xx, h - 6); lastX = xx;
+    }
+  }
+  if (o.pins) {
+    g.strokeStyle = line; g.setLineDash([2, 3]); g.lineWidth = 1;
+    for (const k of o.pins) { const xx = Math.round(x(k)) + 0.5; g.beginPath(); g.moveTo(xx, padT); g.lineTo(xx, padT + H); g.stroke(); }
+    g.setLineDash([]);
+  }
+  if (o.peak != null) {
+    const yy = Math.round(y(o.peak)) + 0.5;
+    g.strokeStyle = css("--down"); g.globalAlpha = .45; g.setLineDash([4, 4]); g.beginPath(); g.moveTo(padL, yy); g.lineTo(padL + W, yy); g.stroke();
+    g.setLineDash([]); g.globalAlpha = 1;
+  }
+  for (const L of o.lines) {
+    const n = L.ys.length; if (!n) continue;
+    if (L.fill) {
+      const grad = g.createLinearGradient(0, padT, 0, padT + H);
+      grad.addColorStop(0, L.fill); grad.addColorStop(1, "rgba(0,0,0,0)");
+      g.beginPath(); g.moveTo(x(0), y(L.ys[0]));
+      for (let k = 1; k < n; k++) g.lineTo(x(k), y(L.ys[k]));
+      g.lineTo(x(n - 1), padT + H); g.lineTo(x(0), padT + H); g.closePath();
+      g.fillStyle = grad; g.fill();
+    }
+    g.beginPath(); g.moveTo(x(0), y(L.ys[0]));
+    for (let k = 1; k < n; k++) g.lineTo(x(k), y(L.ys[k]));
+    g.strokeStyle = L.color; g.lineWidth = L.width || 2; g.lineJoin = "round"; g.stroke();
+    if (L.dot) {
+      const xx = x(n - 1), yy = y(L.ys[n - 1]);
+      g.fillStyle = L.color; g.globalAlpha = .18; g.beginPath(); g.arc(xx, yy, 9, 0, 7); g.fill();
+      g.globalAlpha = 1; g.beginPath(); g.arc(xx, yy, 4, 0, 7); g.fill();
+    }
+  }
+  if (o.markers) {
+    for (const m of o.markers) {
+      const xx = x(m.k), yy = y(m.y), d = m.dir > 0 ? 1 : -1;
+      g.fillStyle = m.color; g.beginPath();
+      g.moveTo(xx, yy + d * 6); g.lineTo(xx - 5, yy + d * 14); g.lineTo(xx + 5, yy + d * 14); g.closePath(); g.fill();
+    }
+  }
+  return { x, y };
+}
+
+function monthLabels(s, i0, n, hideDates) {
+  const out = [];
+  let lastM = -1;
+  for (let k = 0; k < n; k++) {
+    const d = new Date(s.t[i0 + k]);
+    const m = d.getUTCFullYear() * 12 + d.getUTCMonth();
+    if (m !== lastM) {
+      if (lastM !== -1) {
+        const span = n > 400 ? 6 : 3;
+        if (d.getUTCMonth() % span === 0) {
+          out.push([k, hideDates ? "Day " + k : d.getUTCMonth() === 0 ? String(d.getUTCFullYear()) : d.toLocaleDateString("en-US", { month: "short", timeZone: "UTC" })]);
+        }
+      }
+      lastM = m;
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------- home page
+function scenarioStats(sc) {
+  const s = S[sc.ix];
+  const i0 = CR.indexOf(s, sc.from), i1 = CR.indexOf(s, sc.to) - 1;
+  const dd = CR.indexDrawdown(s, i0, i1);
+  return { i0, i1, dd };
+}
+
+function sparkline(c, s, i0, i1) {
+  const ys = Array.from(s.close.slice(i0, i1 + 1));
+  const lo = Math.min(...ys), hi = Math.max(...ys);
+  drawLines(c, { n: ys.length, lo: lo - (hi - lo) * .05, hi: hi + (hi - lo) * .05,
+    lines: [{ ys, color: css("--down"), width: 1.6, fill: css("--down-soft") }] });
+}
+
+function renderCards() {
+  const host = $("cards");
+  host.innerHTML = "";
+  for (const sc of SCENARIOS) {
+    const st = scenarioStats(sc);
+    const best = store.get("best:" + sc.id);
+    const b = document.createElement("button");
+    b.className = "card"; b.dataset.play = sc.id;
+    b.innerHTML = `
+      <div class="card-top"><span class="tag ${sc.id === "2008" ? "hot" : ""}">${sc.tag}</span><span class="tag">${INDEX_NAME[sc.ix]}</span></div>
+      <div><h3></h3><p class="yrs">${sc.from.slice(0, 4)}–${sc.to.slice(0, 4)}</p><p class="blurb">${sc.blurb}</p></div>
+      <canvas aria-hidden="true"></canvas>
+      <div class="card-stats">
+        <div><b class="num down">−${(st.dd.dd * 100).toFixed(0)}%</b><span>peak to bottom</span></div>
+        <div><b class="num">${st.i1 - st.i0}</b><span>trading days</span></div>
+        <div><b class="num ${best ? sign(best.ret) : ""}">${best ? pct(best.ret, 0) : "—"}</b><span>your best</span></div>
+      </div>`;
+    b.querySelector("h3").textContent = sc.name;
+    host.appendChild(b);
+    requestAnimationFrame(() => sparkline(b.querySelector("canvas"), S[sc.ix], st.i0, st.i1));
+  }
+  const best = store.get("best:mystery");
+  const m = document.createElement("button");
+  m.className = "card mystery"; m.dataset.play = "mystery";
+  m.innerHTML = `
+    <div class="card-top"><span class="tag">No dates. No names.</span><span class="tag">S&amp;P 500</span></div>
+    <div><h3>Mystery Crash</h3><p class="yrs">1955–today</p><p class="blurb">One random year with a 15%+ fall.</p></div>
+    <div class="qmark" aria-hidden="true">???</div>
+    <div class="card-stats">
+      <div><b class="num">${MYSTERY.length}</b><span>possible years</span></div>
+      <div><b class="num">252</b><span>trading days</span></div>
+      <div><b class="num">${best ? pct(best.ret, 0) : "—"}</b><span>your best</span></div>
+    </div>`;
+  host.appendChild(m);
+}
+
+// hero tape: the 2008 crash drawing itself
+const tape = { s: S.spx, i0: 0, i1: 0, k: 0, start: 0 };
+function initTape() {
+  tape.i0 = CR.indexOf(tape.s, "2007-06-01"); tape.i1 = CR.indexOf(tape.s, "2009-12-31") - 1;
+  tape.n = tape.i1 - tape.i0 + 1;
+  tape.ys = Array.from(tape.s.close.slice(tape.i0, tape.i1 + 1));
+  tape.lo = Math.min(...tape.ys) * .92; tape.hi = Math.max(...tape.ys) * 1.04;
+  // proof numbers
+  $("pDays").textContent = (S.spx.n + S.ndq.n).toLocaleString("en-US");
+  let worst = 0;
+  for (let i = 1; i < S.spx.n; i++) worst = Math.min(worst, S.spx.close[i] / S.spx.close[i - 1] - 1);
+  $("pWorst").textContent = pct(worst);
+  drawTape(tape.n);
+  if (!reduced) requestAnimationFrame(tapeLoop);
+}
+function drawTape(k) {
+  const ys = tape.ys.slice(0, Math.max(2, k));
+  let peak = 0; for (const v of ys) peak = Math.max(peak, v);
+  const last = ys[ys.length - 1];
+  const troughK = k >= tape.n ? tape.ys.indexOf(Math.min(...tape.ys)) : ys.length - 1;
+  const shown = k >= tape.n ? tape.ys[troughK] : last;
+  $("tapeDate").textContent = CR.iso(tape.s.t[tape.i0 + troughK]);
+  const dd = 1 - shown / peak;
+  $("tapeDD").textContent = "−" + (dd * 100).toFixed(1) + "%";
+  drawLines($("tapeChart"), { n: tape.n, lo: tape.lo, hi: tape.hi, yFmt: fmtLevel,
+    xLabels: monthLabels(tape.s, tape.i0, tape.n), peak,
+    lines: [{ ys, color: css("--down"), width: 2, fill: css("--down-soft"), dot: true }] });
+}
+function tapeLoop(ts) {
+  if ($("home").hidden) { tape.start = 0; requestAnimationFrame(tapeLoop); return; }
+  if (!tape.start) tape.start = ts;
+  const cycle = 9000, t = (ts - tape.start) % cycle;
+  const k = Math.min(tape.n, Math.floor((t / 7000) * tape.n));
+  if (k !== tape.k) { tape.k = k; drawTape(Math.max(k, 2)); }
+  requestAnimationFrame(tapeLoop);
+}
+
+// ---------------------------------------------------------------- game
+const G = {};
+function show(view) {
+  for (const v of ["home", "game", "results"]) $(v).hidden = v !== view;
+  window.scrollTo({ top: 0 });
+}
+
+function startGame(id) {
+  let sc, s, i0, i1, mystery = false;
+  if (id === "mystery") {
+    mystery = true;
+    s = S.spx;
+    let seed = Date.now() % MYSTERY.length;
+    if (MYSTERY.length > 1 && G.lastMystery === MYSTERY[seed]) seed = (seed + 1) % MYSTERY.length;
+    i0 = MYSTERY[seed]; i1 = i0 + 252;
+    G.lastMystery = i0;
+    sc = { id: "mystery", name: "Mystery Crash", ix: "spx", news: [] };
+  } else {
+    sc = SCENARIOS.find((x) => x.id === id);
+    s = S[sc.ix];
+    i0 = CR.indexOf(s, sc.from); i1 = CR.indexOf(s, sc.to) - 1;
+  }
+  const ret = CR.windowReturns(s, i0, i1);
+  const quant = CR.runQuant(CR.quantSignals(s, i0, i1), ret);
+  const hold = CR.runHold(ret);
+  const news = new Map();
+  for (const [d, text] of sc.news) {
+    const k = CR.indexOf(s, d) - i0;
+    if (k >= 0 && k <= i1 - i0) news.set(k, { d: s.t[i0 + k], text });
+  }
+  Object.assign(G, { sc, s, i0, i1, m: i1 - i0, ret, quant, hold, news, mystery,
+    k: 0, acc: 0, playing: false, pauseUntil: 0, player: new CR.Book(1), marks: [],
+    lo: null, hi: null, last: 0 });
+  $("gIndex").textContent = mystery ? "S&P 500 · dates hidden" : INDEX_NAME[sc.ix];
+  $("gName").textContent = sc.name;
+  $("soEyebrow").textContent = mystery ? "Mystery crash" : fmtDate(s.t[i0]);
+  $("soTitle").textContent = "You have $10,000, fully invested.";
+  $("soText").textContent = mystery
+    ? "Somewhere in the next 252 trading days the market falls at least 15%. No dates, no headlines. Trust your nerve."
+    : `${G.m} trading days of the ${INDEX_NAME[sc.ix]} are ahead. Real headlines appear as they happened.`;
+  $("startOverlay").hidden = false;
+  $("news").classList.remove("show");
+  setPosition(1, true);
+  setPlaying(false);
+  show("game");
+  renderGame();
+  $("beginBtn").focus({ preventScroll: true });
+}
+
+function setPlaying(p) {
+  G.playing = p;
+  $("playBtn").setAttribute("aria-label", p ? "Pause" : "Play");
+  $("playBtn").innerHTML = p
+    ? '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2" width="3.5" height="12" rx="1" fill="currentColor"/><rect x="9.5" y="2" width="3.5" height="12" rx="1" fill="currentColor"/></svg>'
+    : '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z" fill="currentColor"/></svg>';
+  if (p) $("startOverlay").hidden = true;
+}
+
+function setPosition(e, silent) {
+  if (!silent && G.player.set(e)) {
+    G.marks.push({ k: G.k, e, prev: G.marks.length ? G.marks[G.marks.length - 1].e : 1 });
+  }
+  for (const b of document.querySelectorAll(".pos button")) b.setAttribute("aria-pressed", String(Number(b.dataset.e) === G.player.exposure));
+  const t = G.player.trades;
+  $("tradeHint").textContent = `${t} trade${t === 1 ? "" : "s"} · 0.05% per trade`;
+  if (!silent) renderSide();
+}
+
+function advance() {
+  if (G.k >= G.m) return;
+  G.player.step(G.ret.mkt[G.k], G.ret.cash[G.k]);
+  G.k++;
+  const ev = G.news.get(G.k);
+  if (ev) {
+    $("newsDate").textContent = fmtDate(ev.d);
+    $("newsText").textContent = ev.text;
+    $("news").classList.add("show");
+    clearTimeout(G.newsT); G.newsT = setTimeout(() => $("news").classList.remove("show"), 3600);
+    G.pauseUntil = performance.now() + 1400;
+  }
+  if (G.k >= G.m) finish();
+}
+
+const SPEED = { base: 7, mult: 2 };
+function loop(ts) {
+  const dt = G.lastTs ? Math.min(ts - G.lastTs, 100) : 0;
+  G.lastTs = ts;
+  if (!$("game").hidden && G.playing && ts >= G.pauseUntil) {
+    G.acc += (dt / 1000) * SPEED.base * SPEED.mult;
+    let moved = false;
+    while (G.acc >= 1 && G.k < G.m && ts >= G.pauseUntil) { advance(); G.acc -= 1; moved = true; }
+    if (moved && !$("game").hidden) renderGame();
+  } else if (!$("game").hidden && G.lo != null) {
+    // keep the y-range easing in place while paused
+    if (G.needsEase) renderGame();
+  }
+  requestAnimationFrame(loop);
+}
+
+function renderGame() {
+  const { s, i0, k } = G;
+  const ys = Array.from(s.close.slice(i0, i0 + k + 1));
+  let lo = Infinity, hi = -Infinity, peak = 0;
+  for (const v of ys) { lo = Math.min(lo, v); hi = Math.max(hi, v); peak = Math.max(peak, v); }
+  const pad = Math.max((hi - lo) * .12, hi * .03);
+  const tLo = lo - pad, tHi = hi + pad;
+  if (G.lo == null || reduced) { G.lo = tLo; G.hi = tHi; }
+  else { G.lo += (tLo - G.lo) * .25; G.hi += (tHi - G.hi) * .25; }
+  G.needsEase = Math.abs(G.lo - tLo) > (tHi - tLo) * .002 || Math.abs(G.hi - tHi) > (tHi - tLo) * .002;
+  const base = s.close[i0];
+  const fmt = G.mystery ? (v) => pct(v / base - 1, 0) : fmtLevel;
+  const down = css("--down"), up = css("--up");
+  drawLines($("chart"), {
+    n: G.m + 1, lo: G.lo, hi: G.hi, yFmt: fmt, peak,
+    xLabels: monthLabels(s, i0, G.m + 1, G.mystery),
+    pins: [...G.news.keys()].filter((x) => x <= k),
+    lines: [{ ys, color: css("--accent"), width: 2.2, fill: css("--accent-soft"), dot: true }],
+    markers: G.marks.map((mk) => ({ k: mk.k, y: s.close[i0 + mk.k], dir: mk.e > mk.prev ? 1 : -1, color: mk.e > mk.prev ? up : down })),
+  });
+  const now = s.close[i0 + k], prev = s.close[i0 + Math.max(k - 1, 0)];
+  $("tDate").textContent = G.mystery ? "Day " + k : fmtDate(s.t[i0 + k]);
+  $("tLvl").textContent = G.mystery ? pct(now / base - 1) + " since day 0" : fmtLevel(now);
+  const ch = k ? now / prev - 1 : 0;
+  $("tChg").textContent = pct(ch, 2); $("tChg").className = "chg " + sign(ch);
+  const dd = 1 - now / peak;
+  $("tDD").textContent = "−" + (dd * 100).toFixed(1) + "% from peak";
+  $("tDD").style.visibility = dd > 0.001 ? "visible" : "hidden";
+  $("prog").style.width = (k / G.m) * 100 + "%";
+  renderSide();
+}
+
+function renderSide() {
+  const k = G.k, p = G.player;
+  $("yVal").textContent = money(p.value);
+  const r = p.value / CR.START_CASH - 1;
+  $("yRet").textContent = pct(r) + " · max drawdown " + (p.maxDD * 100).toFixed(1) + "%";
+  $("yRet").className = "num " + sign(r);
+  const racers = [
+    { who: "You", color: css("--accent"), v: p.value, meta: `${Math.round(p.exposure * 100)}% invested` },
+    { who: "Buy and hold", color: css("--hold"), v: G.hold.path[k], meta: "100% invested, never trades" },
+    { who: "The quant", color: css("--quant"), v: G.quant.book.path[k], meta: `${Math.round(G.quant.pos[k] * 100)}% invested · trend + volatility rules` },
+  ];
+  const max = Math.max(...racers.map((x) => x.v), CR.START_CASH);
+  const host = $("race");
+  if (!host.children.length) {
+    host.innerHTML = racers.map(() => `<div class="racer"><span class="who"><span class="legend-dot"></span><span></span></span><span class="v"></span><span class="bar"><i></i></span><span class="meta"></span></div>`).join("");
+  }
+  racers.forEach((x, i) => {
+    const el = host.children[i];
+    el.querySelector(".legend-dot").style.background = x.color;
+    el.querySelector(".who span:last-child").textContent = x.who;
+    el.querySelector(".v").textContent = money(x.v);
+    el.querySelector(".v").className = "v " + sign(x.v - CR.START_CASH);
+    el.querySelector(".bar i").style.width = (x.v / max) * 100 + "%";
+    el.querySelector(".bar i").style.background = x.color;
+    el.querySelector(".meta").textContent = x.meta;
+  });
+}
+
+// ---------------------------------------------------------------- results
+function finish() {
+  setPlaying(false);
+  const p = G.player, cash = G.ret.cash;
+  const you = CR.stats(p, cash), hold = CR.stats(G.hold, cash), quant = CR.stats(G.quant.book, cash);
+  const skill = CR.skillTest(G.ret, p.trades, p.value, 2000, 7 + p.trades);
+  Object.assign(G, { you, holdS: hold, quantS: quant, skill });
+
+  const key = "best:" + G.sc.id, best = store.get(key);
+  const isBest = !best || you.ret > best.ret;
+  if (isBest) store.set(key, { ret: you.ret, at: Date.now() });
+
+  const beatHold = you.final > hold.final, beatQuant = you.final > quant.final;
+  const title = beatHold && beatQuant ? "You beat the market and the quant."
+    : beatHold ? "You beat the market."
+    : beatQuant ? "The market won, but you beat the quant."
+    : p.trades === 0 ? "You held through everything." : "The market beat you this time.";
+  $("rTitle").textContent = title;
+  const label = G.mystery ? "Mystery Crash" : G.sc.name;
+  $("rEyebrow").textContent = label + (isBest && best ? " · New personal best" : " · Final");
+  $("rSub").textContent = `You turned $10,000 into ${money(you.final)} (${pct(you.ret)}). Buy and hold ended at ${money(hold.final)} (${pct(hold.ret)}) and the quant at ${money(quant.final)} (${pct(quant.ret)}).`;
+  const rv = $("rReveal");
+  if (G.mystery) {
+    const s = G.s;
+    rv.hidden = false;
+    rv.textContent = `It was the S&P 500 from ${fmtDate(s.t[G.i0])} to ${fmtDate(s.t[G.i1])}. The index fell ${(CR.indexDrawdown(s, G.i0, G.i1).dd * 100).toFixed(1)}% from its high in that stretch.`;
+  } else rv.hidden = true;
+
+  const rows = [
+    ["Final value", money(you.final), money(hold.final), money(quant.final)],
+    ["Total return", pct(you.ret), pct(hold.ret), pct(quant.ret)],
+    ["Max drawdown", "−" + (you.maxDD * 100).toFixed(1) + "%", "−" + (hold.maxDD * 100).toFixed(1) + "%", "−" + (quant.maxDD * 100).toFixed(1) + "%"],
+    ["Worst day", pct(you.worstDay), pct(hold.worstDay), pct(quant.worstDay)],
+    ["Sharpe ratio", you.sharpe.toFixed(2), hold.sharpe.toFixed(2), quant.sharpe.toFixed(2)],
+    ["Trades", String(you.trades), "0", String(quant.trades)],
+  ];
+  $("rTable").innerHTML = rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("");
+
+  if (p.trades === 0) {
+    $("rSkill").textContent = "n/a";
+    $("rSkillText").textContent = "You never traded, so there is no timing to test. Make a few calls next round and see if they beat chance.";
+  } else {
+    $("rSkill").textContent = Math.round(skill.pct * 100) + "%";
+    const pval = 1 - skill.pct;
+    $("rSkillText").textContent = `You beat ${Math.round(skill.pct * 100)}% of 2,000 random traders who also made ${p.trades} trade${p.trades === 1 ? "" : "s"}. ` +
+      (pval < 0.05 ? `That's p ≈ ${pval.toFixed(3)}: your timing looks like real skill.` : pval < 0.25 ? "Better than most, though luck could still explain it." : "Random timing did about as well. Markets are hard.");
+  }
+
+  const tag = G.mystery ? "a mystery crash" : "the " + G.sc.name;
+  $("brag").value = `I played ${tag} on Crash Replay with real market data: $10,000 → ${money(you.final)} (${pct(you.ret)}). Buy and hold: ${pct(hold.ret)}.` +
+    (p.trades ? ` I beat ${Math.round(skill.pct * 100)}% of random traders.` : "") + ` Can you beat me?` + (SHARE_URL ? " " + SHARE_URL : "");
+  show("results");
+  requestAnimationFrame(drawResults);
+}
+
+function drawResults() {
+  const yP = G.player.path, yH = G.hold.path, yQ = G.quant.book.path;
+  const all = [...yP, ...yH, ...yQ];
+  const lo = Math.min(...all), hi = Math.max(...all), pad = (hi - lo) * .08;
+  drawLines($("eqChart"), {
+    n: G.m + 1, lo: lo - pad, hi: hi + pad, yFmt: (v) => "$" + (v / 1000).toFixed(v < 10000 && hi - lo < 4000 ? 1 : 0) + "k",
+    xLabels: monthLabels(G.s, G.i0, G.m + 1, G.mystery),
+    lines: [
+      { ys: yH, color: css("--hold"), width: 1.6 },
+      { ys: yQ, color: css("--quant"), width: 1.8 },
+      { ys: yP, color: css("--accent"), width: 2.6, dot: true },
+    ],
+    markers: G.marks.map((mk) => ({ k: mk.k, y: yP[mk.k], dir: mk.e > mk.prev ? 1 : -1, color: mk.e > mk.prev ? css("--up") : css("--down") })),
+  });
+  drawHist();
+}
+
+function drawHist() {
+  const c = $("histChart");
+  const { g, w, h } = setupCanvas(c);
+  const f = Array.from(G.skill.finals);
+  const marks = [[G.player.value, css("--accent"), "You"], [G.hold.value, css("--hold"), "Hold"], [G.quant.book.value, css("--quant"), "Quant"]];
+  const vals = f.concat(marks.map((m) => m[0]));
+  const lo = Math.min(...vals), hi = Math.max(...vals);
+  const bins = 36, bw = (hi - lo) / bins || 1;
+  const counts = new Array(bins).fill(0);
+  for (const v of f) counts[Math.min(bins - 1, Math.floor((v - lo) / bw))]++;
+  const maxC = Math.max(...counts, 1);
+  const padB = 20, padT = 18, W = w, H = h - padB - padT;
+  const x = (v) => ((v - lo) / (hi - lo || 1)) * (W - 2) + 1;
+  g.fillStyle = css("--line");
+  if (G.player.trades) counts.forEach((cnt, i) => {
+    const bh = (cnt / maxC) * H;
+    g.fillRect(x(lo + i * bw) + 1, padT + H - bh, Math.max(1, (W / bins) - 2), bh);
+  });
+  g.font = "600 11px " + css("--mono"); g.textAlign = "center";
+  marks.forEach(([v, col, label], i) => {
+    const xx = Math.round(x(v)) + 0.5;
+    g.strokeStyle = col; g.lineWidth = label === "You" ? 2.5 : 1.5;
+    g.beginPath(); g.moveTo(xx, padT - 2); g.lineTo(xx, padT + H); g.stroke();
+    g.fillStyle = col;
+    g.fillText(label, Math.min(Math.max(xx, 20), W - 20), label === "You" ? 12 : padT + H + 14 + (i === 2 ? 0 : 0));
+  });
+  g.fillStyle = css("--muted"); g.textAlign = "left"; g.font = "500 11px " + css("--mono");
+  g.fillText(money(lo), 0, h - 2); g.textAlign = "right"; g.fillText(money(hi), W, h - 2);
+}
+
+// score card (1200 x 630)
+function scoreCard() {
+  const c = document.createElement("canvas");
+  c.width = 1200; c.height = 630;
+  const g = c.getContext("2d");
+  const bg = "#0b0f17", ink = "#eef2f8", muted = "#8d97ab", blue = "#5b8cff", red = "#ff5c61", green = "#2bd19a", amber = "#f5b83d";
+  g.fillStyle = bg; g.fillRect(0, 0, 1200, 630);
+  const font = (w, s, mono) => `${w} ${s}px ${mono ? '"Geist Mono", ui-monospace, monospace' : '"Geist", system-ui, sans-serif'}`;
+  g.fillStyle = muted; g.font = font(600, 22, true); g.fillText("CRASH REPLAY", 64, 82);
+  g.fillStyle = ink; g.font = font(700, 30, false); g.fillText(G.mystery ? "Mystery Crash" : G.sc.name, 64, 128);
+  g.font = font(800, 92, false); g.fillStyle = G.you.ret >= 0 ? green : red;
+  g.fillText(pct(G.you.ret), 64, 250);
+  g.fillStyle = ink; g.font = font(600, 30, false);
+  g.fillText(`$10,000 → ${money(G.you.final)}`, 64, 300);
+  g.font = font(500, 24, true); g.fillStyle = muted;
+  g.fillText(`Buy and hold  ${pct(G.holdS.ret)}`, 64, 370);
+  g.fillText(`The quant     ${pct(G.quantS.ret)}`, 64, 408);
+  if (G.player.trades) { g.fillStyle = blue; g.fillText(`Beat ${Math.round(G.skill.pct * 100)}% of random traders`, 64, 446); }
+  // mini chart
+  const X0 = 620, Y0 = 90, W = 520, H = 380;
+  const all = [...G.player.path, ...G.hold.path, ...G.quant.book.path];
+  const lo = Math.min(...all), hi = Math.max(...all);
+  const line = (ys, col, lw) => {
+    g.beginPath();
+    ys.forEach((v, k) => { const xx = X0 + (k / (ys.length - 1)) * W, yy = Y0 + (1 - (v - lo) / (hi - lo || 1)) * H; k ? g.lineTo(xx, yy) : g.moveTo(xx, yy); });
+    g.strokeStyle = col; g.lineWidth = lw; g.lineJoin = "round"; g.stroke();
+  };
+  line(G.hold.path, "#5d667a", 3); line(G.quant.book.path, amber, 3); line(G.player.path, blue, 5);
+  g.fillStyle = ink; g.font = font(700, 34, false); g.fillText("Can you beat me?", 64, 560);
+  g.fillStyle = muted; g.font = font(500, 20, true); g.fillText("Real prices · No hindsight", 64, 592);
+  return c;
+}
+
+async function saveCard() {
+  const c = scoreCard();
+  const blob = await new Promise((r) => c.toBlob(r, "image/png"));
+  const name = `crash-replay-${G.sc.id}.png`;
+  let dl = null;
+  try { dl = window.claude && window.claude.use ? await window.claude.use("downloads") : null; } catch (e) { dl = null; }
+  if (dl) {
+    try { await dl.save({ filename: name, data: blob }); toast("Score card saved"); }
+    catch (e) { if (e && e.code !== "declined") toast("Saving isn't available here"); }
+    return;
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ---------------------------------------------------------------- wiring
+document.addEventListener("click", (e) => {
+  const nav = e.target.closest('.nav-links a[href^="#"]');
+  if (nav && $("home").hidden) {
+    e.preventDefault();
+    if (G.playing) setPlaying(false);
+    renderCards(); show("home");
+    setTimeout(() => $(nav.getAttribute("href").slice(1)).scrollIntoView(), 30);
+    return;
+  }
+  const p = e.target.closest("[data-play]");
+  if (p) { startGame(p.dataset.play); return; }
+  const pos = e.target.closest(".pos button");
+  if (pos && !$("game").hidden) {
+    setPosition(Number(pos.dataset.e));
+    renderGame();
+    return;
+  }
+  const sp = e.target.closest("[data-speed]");
+  if (sp) {
+    SPEED.mult = Number(sp.dataset.speed);
+    for (const b of document.querySelectorAll("[data-speed]")) b.setAttribute("aria-pressed", String(b === sp));
+  }
+});
+$("beginBtn").onclick = () => { setPlaying(true); $("beginBtn").blur(); };
+$("playBtn").onclick = () => { if (G.k < G.m) setPlaying(!G.playing); };
+$("stepBtn").onclick = () => { setPlaying(false); $("startOverlay").hidden = true; advance(); renderGame(); };
+$("quitBtn").onclick = () => { setPlaying(false); renderCards(); show("home"); };
+$("homeBtn").onclick = () => { if (G.playing) setPlaying(false); renderCards(); show("home"); };
+$("againBtn").onclick = () => startGame(G.sc.id);
+$("otherBtn").onclick = () => { renderCards(); show("home"); setTimeout(() => $("crashes").scrollIntoView({ behavior: reduced ? "auto" : "smooth" }), 30); };
+$("copyBtn").onclick = async () => {
+  const text = $("brag").value;
+  try { await navigator.clipboard.writeText(text); toast("Copied. Paste it anywhere."); }
+  catch (e) { $("brag").select(); toast("Selected. Press Ctrl+C or ⌘C to copy."); }
+};
+$("cardBtn").onclick = () => saveCard();
+
+document.addEventListener("keyup", (e) => {
+  if (!$("game").hidden && e.key === " " && e.target.closest && e.target.closest("button")) e.preventDefault();
+});
+document.addEventListener("keydown", (e) => {
+  if ($("game").hidden || e.metaKey || e.ctrlKey || e.altKey) return;
+  const map = { "1": 0, "2": 0.5, "3": 1 };
+  if (e.key in map) { setPosition(map[e.key]); renderGame(); e.preventDefault(); }
+  else if (e.key === " ") { if (G.k < G.m) setPlaying(!G.playing); e.preventDefault(); }
+  else if (e.key === "ArrowRight") { $("stepBtn").click(); e.preventDefault(); }
+  else if (e.key === "Escape") $("quitBtn").click();
+});
+
+let rz;
+window.addEventListener("resize", () => {
+  clearTimeout(rz);
+  rz = setTimeout(() => {
+    if (!$("home").hidden) { renderCards(); drawTape(tape.k || tape.n); }
+    if (!$("game").hidden) renderGame();
+    if (!$("results").hidden) drawResults();
+  }, 120);
+});
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => window.dispatchEvent(new Event("resize")));
+new MutationObserver(() => window.dispatchEvent(new Event("resize"))).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+renderCards();
+initTape();
+requestAnimationFrame(loop);
+const deep = (location.hash || "").slice(1);
+if (deep && (deep === "mystery" || SCENARIOS.some((x) => x.id === deep))) startGame(deep);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => window.dispatchEvent(new Event("resize")));
+})();
+</script>
