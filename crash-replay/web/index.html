@@ -72,6 +72,24 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .btn-primary:hover { background: color-mix(in srgb, var(--accent) 88%, var(--ink)); }
 .btn-ghost { background: var(--surface); border-color: var(--line); }
 .btn-ghost:hover { background: var(--surface-2); }
+.btn-lg { padding: 16px 28px; font-size: 17px; }
+.sub-cta { margin-top: 12px; font-size: 14px; color: var(--muted); }
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.steps div { display: flex; gap: 14px; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; min-width: 0; }
+.steps b { flex: none; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; background: var(--accent-soft); color: var(--accent); font: 600 15px/1 var(--mono); }
+.steps p { font-weight: 500; }
+@media (max-width: 760px) { .steps { grid-template-columns: 1fr; } }
+details.math { margin-top: 16px; }
+details.math > summary { cursor: pointer; color: var(--muted); font-weight: 500; font-size: 15px; padding: 8px 0; list-style-position: inside; }
+details.math > summary:hover { color: var(--ink); }
+details.math .how { margin-top: 12px; }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px 18px; display: grid; gap: 6px; min-width: 0; }
+.tile.me { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.tile span { font-size: 14px; color: var(--muted); display: flex; align-items: center; }
+.tile b { font: 600 clamp(22px, 3.4vw, 32px)/1 var(--mono); letter-spacing: -.03em; }
+.tile small { font: 500 13px/1 var(--mono); color: var(--muted); }
+@media (max-width: 480px) { .tiles { gap: 8px; } .tile { padding: 12px; } }
 
 /* hero */
 .hero { padding-block: 56px 32px; display: grid; grid-template-columns: 1.02fr 1fr; gap: 48px; align-items: center; }
@@ -105,9 +123,11 @@ section.block { padding-block: 40px; }
 .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
 @media (max-width: 920px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-.card { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 12px; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; min-width: 0; }
+.card { cursor: pointer; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 12px; transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; min-width: 0; }
 .card:hover { transform: translateY(-2px); box-shadow: var(--shadow); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); }
-.card-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card-top > b { font-size: 18px; }
+.card .best { font-size: 13px; color: var(--muted); }
 .tag { font: 600 11px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); background: var(--surface-2); padding: 6px 8px; border-radius: 6px; }
 .tag.hot { color: var(--down); background: var(--down-soft); }
 .card h3 { font-size: 21px; font-weight: 700; }
@@ -123,7 +143,7 @@ section.block { padding-block: 40px; }
 .card.mystery .tag { background: rgba(127,127,127,.2); color: inherit; }
 .card.mystery .yrs, .card.mystery .card-stats span { color: color-mix(in srgb, var(--bg) 65%, var(--ink)); }
 .card.mystery .card-stats { border-top-color: rgba(127,127,127,.3); }
-.qmark { height: 64px; display: flex; align-items: center; font: 700 44px/1 var(--mono); letter-spacing: .3em; opacity: .9; }
+.qmark { justify-content: center; height: 64px; display: flex; align-items: center; font: 700 44px/1 var(--mono); letter-spacing: .3em; opacity: .9; }
 
 /* how it works */
 .how { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
@@ -159,7 +179,7 @@ footer a { color: var(--ink); }
   .pos { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); z-index: 30; box-shadow: var(--shadow); border: 1px solid var(--line); background: color-mix(in srgb, var(--surface-2) 92%, transparent); backdrop-filter: blur(10px); }
   #game[hidden] .pos { display: none; }
 }
-@media (max-width: 600px) { #chart { height: 300px; } .news { top: auto; bottom: 44px; } .news div { font-size: 14px; } }
+
 .chart-card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; position: relative; min-width: 0; }
 .ticker { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
 .ticker .date { font: 600 clamp(28px, 4vw, 40px)/1 var(--mono); letter-spacing: -.04em; }
@@ -180,7 +200,7 @@ footer a { color: var(--ink); }
 .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
 .big-val { font: 600 34px/1 var(--mono); letter-spacing: -.04em; }
 .pos { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; background: var(--surface-2); padding: 5px; border-radius: 14px; }
-.pos button { border: 0; background: none; border-radius: 10px; padding: 12px 4px; display: grid; gap: 4px; justify-items: center; font-weight: 600; font-size: 14px; color: var(--muted); }
+.pos button { border: 0; background: none; border-radius: 10px; padding: 16px 4px; font-size: 15px !important; display: grid; gap: 4px; justify-items: center; font-weight: 600; font-size: 14px; color: var(--muted); }
 .pos button small { font: 500 11px/1 var(--mono); opacity: .8; }
 .pos button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
 .pos button[aria-pressed="true"][data-e="0"] { color: var(--down); }
@@ -217,6 +237,7 @@ td:first-child { font-family: var(--font); color: var(--muted); }
 .reveal { background: var(--accent-soft); border-radius: 14px; padding: 16px 18px; font-weight: 600; }
 .copybox { width: 100%; font: 13px/1.5 var(--mono); border: 1px solid var(--line); background: var(--surface-2); color: var(--ink); border-radius: 10px; padding: 10px; resize: none; }
 
+@media (max-width: 600px) { #chart { height: 300px; } .news { align-items: flex-end; top: auto; bottom: 44px; } .news div { font-size: 14px; } }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
@@ -239,76 +260,59 @@ td:first-child { font-family: var(--font); color: var(--muted); }
 <main id="home">
   <div class="wrap hero">
     <div>
-      <p class="eyebrow">Real prices · Real crashes · No hindsight</p>
+      <p class="eyebrow">Real prices · Real crashes</p>
       <h1>The crash is coming.<br><em>Do you sell?</em></h1>
-      <p class="lede">Relive the worst markets in history one day at a time with $10,000. Sell, hold or buy the dip. Then see if you beat the market, a professional quant strategy and 2,000 random traders.</p>
+      <p class="lede">Replay a real market crash day by day with $10,000. Sell, hold or go all in. Can you beat the market?</p>
       <div class="ctas">
-        <button class="btn btn-primary" data-play="2008">Play the 2008 crash
+        <button class="btn btn-primary btn-lg" data-play="2008">Play the 2008 crash
           <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8h9M8 4l4 4-4 4" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </button>
-        <button class="btn btn-ghost" data-play="mystery">Mystery crash</button>
       </div>
-      <div class="proof">
-        <div><b class="num" id="pDays">—</b><span>trading days of data</span></div>
-        <div><b class="num">1950</b><span>S&amp;P 500 history from</span></div>
-        <div><b class="num" id="pWorst">—</b><span>worst single day</span></div>
-      </div>
+      <p class="sub-cta">Takes about 2 minutes. No sign-up.</p>
     </div>
     <div class="tape" aria-label="The S&amp;P 500 during the 2008 financial crisis">
       <div class="tape-head">
         <div>
-          <div class="eyebrow"><span class="live-dot"></span>Replaying · S&amp;P 500</div>
+          <div class="eyebrow"><span class="live-dot"></span>S&amp;P 500 · 2008</div>
           <div class="tape-date" id="tapeDate" style="margin-top:10px">2009-03-09</div>
         </div>
-        <div style="text-align:right">
-          <div class="tape-dd down" id="tapeDD">−56.8%</div>
-          <div class="tape-sub">from the peak</div>
-        </div>
+        <div class="tape-dd down" id="tapeDD">−56.8%</div>
       </div>
       <canvas id="tapeChart" aria-hidden="true"></canvas>
     </div>
   </div>
 
   <section class="block wrap" id="crashes">
-    <div class="block-head">
-      <div>
-        <h2>Pick your crash</h2>
-        <p>Every chart is real daily index data. Your $10,000 starts fully invested a few months before the top.</p>
-      </div>
-    </div>
+    <div class="block-head"><h2>Or pick a crash</h2></div>
     <div class="grid" id="cards"></div>
   </section>
 
   <section class="block wrap" id="how">
-    <div class="block-head">
-      <div>
-        <h2>How it works</h2>
-        <p>Built like a real backtest, so your score means something.</p>
+    <div class="steps">
+      <div><b>1</b><p>Watch the market move one day at a time.</p></div>
+      <div><b>2</b><p>Tap Sell, Half or All in whenever you want.</p></div>
+      <div><b>3</b><p>See if you beat the market, a quant and luck.</p></div>
+    </div>
+    <details class="math">
+      <summary>How the scoring works</summary>
+      <div class="how">
+        <article>
+          <h3>No peeking at tomorrow</h3>
+          <p>You decide at each day's close and earn the next day's move. Each trade costs 0.05%. Cash earns that day's 3-month Treasury bill rate, and S&amp;P 500 positions earn dividends.</p>
+          <div class="formula">V(t+1) = V(t) · (1 + e·r_mkt + (1−e)·r_cash)</div>
+        </article>
+        <article>
+          <h3>The quant you race</h3>
+          <p>It follows two rules trend-following funds use: stay invested only above the 200-day average, and size the bet to target 15% volatility.</p>
+          <div class="formula">size = 1[P &gt; SMA200] · min(1, 15% / σ20)</div>
+        </article>
+        <article>
+          <h3>Skill or luck?</h3>
+          <p>2,000 random traders make as many trades as you, on random days. Beat 95% of them and your timing is better than chance (a permutation test).</p>
+          <div class="formula">p ≈ share of random traders above you</div>
+        </article>
       </div>
-    </div>
-    <div class="how">
-      <article>
-        <p class="eyebrow">01 · The rules</p>
-        <h3>No peeking at tomorrow</h3>
-        <p>You decide at each day's close and earn the next day's move. Each trade costs 0.05%. Cash earns the 3-month Treasury bill rate of the day, and S&amp;P 500 positions earn dividends.</p>
-        <div class="formula">V(t+1) = V(t) · (1 + e·r_mkt + (1−e)·r_cash)
-e ∈ {0, ½, 1}   cost = 5 bp · |Δe| · V</div>
-      </article>
-      <article>
-        <p class="eyebrow">02 · Your opponents</p>
-        <h3>The market and the quant</h3>
-        <p><span class="legend-dot" style="background:var(--hold)"></span>Buy and hold never trades. <span class="legend-dot" style="background:var(--quant)"></span>The quant runs the two rules trend-following funds use: stay invested only above the 200-day average, and size the bet to target 15% volatility.</p>
-        <div class="formula">size = 1[P &gt; SMA200] · min(1, 15% / σ20)
-σ20 = stdev(20 daily log returns) · √252</div>
-      </article>
-      <article>
-        <p class="eyebrow">03 · The skill test</p>
-        <h3>Was it skill or luck?</h3>
-        <p>2,000 random traders make exactly as many trades as you, on random days. If you beat 95% of them, your timing was better than chance. That is a permutation test, the same idea used to check trading strategies.</p>
-        <div class="formula">p-value ≈ share of random traders
-          who finished above you</div>
-      </article>
-    </div>
+    </details>
   </section>
 </main>
 
@@ -320,14 +324,6 @@ e ∈ {0, ½, 1}   cost = 5 bp · |Δe| · V</div>
     </div>
     <div class="controls">
       <button class="icon-btn" id="playBtn" aria-label="Pause"></button>
-      <button class="icon-btn" id="stepBtn" aria-label="Next day">
-        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M4 3l6 5-6 5V3zM12 3v10" stroke="currentColor" stroke-width="1.8" fill="currentColor" stroke-linejoin="round"/></svg>
-      </button>
-      <div class="speed" role="group" aria-label="Speed">
-        <button data-speed="1" aria-pressed="false">1×</button>
-        <button data-speed="2" aria-pressed="true">2×</button>
-        <button data-speed="4" aria-pressed="false">4×</button>
-      </div>
       <button class="btn btn-ghost" id="quitBtn" style="padding:10px 16px">Quit</button>
     </div>
   </div>
@@ -337,7 +333,6 @@ e ∈ {0, ½, 1}   cost = 5 bp · |Δe| · V</div>
     <div class="chart-card">
       <div class="ticker">
         <span class="date" id="tDate">—</span>
-        <span class="lvl" id="tLvl">—</span>
         <span class="chg" id="tChg">—</span>
         <span class="dd" id="tDD">−0.0% from peak</span>
       </div>
@@ -345,11 +340,9 @@ e ∈ {0, ½, 1}   cost = 5 bp · |Δe| · V</div>
       <div class="news" aria-live="polite"><div id="news"><small id="newsDate"></small><span id="newsText"></span></div></div>
       <div class="start-overlay" id="startOverlay">
         <div>
-          <p class="eyebrow" id="soEyebrow">Day 1</p>
-          <h2 style="font-size:26px" id="soTitle">You have $10,000, fully invested.</h2>
-          <p id="soText">The market moves one day at a time. Change your position whenever you like.</p>
-          <button class="btn btn-primary" id="beginBtn">Start the clock</button>
-          <p class="hint"><span class="kbd">1</span><span class="kbd">2</span><span class="kbd">3</span> position · <span class="kbd">Space</span> pause · <span class="kbd">→</span> next day</p>
+          <h2 style="font-size:26px" id="soTitle">You have $10,000 in the market.</h2>
+          <p id="soText">Days will start ticking by. Tap Sell, Half or All in at any time.</p>
+          <button class="btn btn-primary btn-lg" id="beginBtn">Start</button>
         </div>
       </div>
     </div>
@@ -357,19 +350,18 @@ e ∈ {0, ½, 1}   cost = 5 bp · |Δe| · V</div>
     <aside class="side">
       <div class="panel">
         <div>
-          <p class="eyebrow">Your portfolio</p>
+          <p class="eyebrow">Your money</p>
           <div class="big-val" id="yVal" style="margin-top:8px">$10,000</div>
-          <div class="num" id="yRet" style="margin-top:6px;font-size:14px">+0.0%</div>
+          <div class="num" id="yRet" style="margin-top:6px;font-size:15px">+0.0%</div>
         </div>
         <div class="pos" role="group" aria-label="Your position">
-          <button data-e="0" aria-pressed="false">Cash<small>0%</small></button>
-          <button data-e="0.5" aria-pressed="false">Half<small>50%</small></button>
-          <button data-e="1" aria-pressed="true">All in<small>100%</small></button>
+          <button data-e="0" aria-pressed="false">Sell all</button>
+          <button data-e="0.5" aria-pressed="false">Half</button>
+          <button data-e="1" aria-pressed="true">All in</button>
         </div>
-        <p class="hint" id="tradeHint">0 trades · 0.05% per trade</p>
       </div>
       <div class="panel">
-        <p class="eyebrow">The race</p>
+        <p class="eyebrow">Who's winning</p>
         <div class="race" id="race"></div>
       </div>
     </aside>
@@ -378,47 +370,47 @@ e ∈ {0, ½, 1}   cost = 5 bp · |Δe| · V</div>
 
 <main id="results" class="wrap" hidden>
   <div class="verdict">
-    <p class="eyebrow" id="rEyebrow">2008 Financial Crisis · Final</p>
+    <p class="eyebrow" id="rEyebrow">2008 Financial Crisis</p>
     <h1 id="rTitle">You beat the market.</h1>
     <p id="rSub"></p>
     <div class="reveal" id="rReveal" hidden></div>
   </div>
+  <div class="tiles" id="rTiles"></div>
   <div class="res-grid">
     <div class="chart-card" style="display:grid;gap:12px">
-      <div class="legend">
-        <span><span class="legend-dot" style="background:var(--accent)"></span>You</span>
-        <span><span class="legend-dot" style="background:var(--hold)"></span>Buy and hold</span>
-        <span><span class="legend-dot" style="background:var(--quant)"></span>The quant</span>
-      </div>
       <canvas id="eqChart" aria-label="Portfolio value over time"></canvas>
-      <div class="tbl">
-        <table>
-          <thead><tr><th></th><th>You</th><th>Hold</th><th>Quant</th></tr></thead>
-          <tbody id="rTable"></tbody>
-        </table>
-      </div>
     </div>
     <div class="side">
       <div class="panel">
-        <p class="eyebrow">Skill test</p>
-        <div class="skill-big" id="rSkill">—</div>
-        <p id="rSkillText" style="color:var(--muted);font-size:14px"></p>
-        <canvas id="histChart" aria-label="Final values of 2,000 random traders"></canvas>
-      </div>
-      <div class="panel">
         <p class="eyebrow">Challenge a friend</p>
-        <textarea class="copybox" id="brag" rows="4" readonly aria-label="Share text"></textarea>
+        <textarea class="copybox" id="brag" rows="5" readonly aria-label="Share text"></textarea>
         <div class="share-row">
-          <button class="btn btn-primary" id="copyBtn">Copy</button>
-          <button class="btn btn-ghost" id="cardBtn">Save score card</button>
+          <button class="btn btn-primary" id="copyBtn">Copy text</button>
+          <button class="btn btn-ghost" id="cardBtn">Save image</button>
         </div>
       </div>
       <div class="share-row">
-        <button class="btn btn-ghost" id="againBtn">Play again</button>
-        <button class="btn btn-ghost" id="otherBtn">Try another crash</button>
+        <button class="btn btn-primary" id="againBtn">Play again</button>
+        <button class="btn btn-ghost" id="otherBtn">Another crash</button>
       </div>
     </div>
   </div>
+  <details class="math" id="rDetails">
+    <summary>See full stats</summary>
+    <div class="res-grid" style="margin-top:16px">
+      <div class="chart-card tbl">
+        <table>
+          <thead><tr><th></th><th>You</th><th>Market</th><th>Quant</th></tr></thead>
+          <tbody id="rTable"></tbody>
+        </table>
+      </div>
+      <div class="panel">
+        <p class="eyebrow">Skill test</p>
+        <p id="rSkillText" style="color:var(--muted);font-size:14px"></p>
+        <canvas id="histChart" aria-label="Final values of 2,000 random traders"></canvas>
+      </div>
+    </div>
+  </details>
 </main>
 
 <footer>
@@ -657,14 +649,10 @@ function renderCards() {
     const b = document.createElement("button");
     b.className = "card"; b.dataset.play = sc.id;
     b.innerHTML = `
-      <div class="card-top"><span class="tag ${sc.id === "2008" ? "hot" : ""}">${sc.tag}</span><span class="tag">${INDEX_NAME[sc.ix]}</span></div>
-      <div><h3></h3><p class="yrs">${sc.from.slice(0, 4)}–${sc.to.slice(0, 4)}</p><p class="blurb">${sc.blurb}</p></div>
+      <div class="card-top"><h3></h3><b class="num down">−${(st.dd.dd * 100).toFixed(0)}%</b></div>
+      <p class="blurb">${sc.from.slice(0, 4)}–${sc.to.slice(0, 4)} · ${sc.blurb}</p>
       <canvas aria-hidden="true"></canvas>
-      <div class="card-stats">
-        <div><b class="num down">−${(st.dd.dd * 100).toFixed(0)}%</b><span>peak to bottom</span></div>
-        <div><b class="num">${st.i1 - st.i0}</b><span>trading days</span></div>
-        <div><b class="num ${best ? sign(best.ret) : ""}">${best ? pct(best.ret, 0) : "—"}</b><span>your best</span></div>
-      </div>`;
+      ${best ? `<p class="best">Your best: <b class="num ${sign(best.ret)}">${pct(best.ret, 0)}</b></p>` : ""}`;
     b.querySelector("h3").textContent = sc.name;
     host.appendChild(b);
     requestAnimationFrame(() => sparkline(b.querySelector("canvas"), S[sc.ix], st.i0, st.i1));
@@ -673,14 +661,10 @@ function renderCards() {
   const m = document.createElement("button");
   m.className = "card mystery"; m.dataset.play = "mystery";
   m.innerHTML = `
-    <div class="card-top"><span class="tag">No dates. No names.</span><span class="tag">S&amp;P 500</span></div>
-    <div><h3>Mystery Crash</h3><p class="yrs">1955–today</p><p class="blurb">One random year with a 15%+ fall.</p></div>
-    <div class="qmark" aria-hidden="true">???</div>
-    <div class="card-stats">
-      <div><b class="num">${MYSTERY.length}</b><span>possible years</span></div>
-      <div><b class="num">252</b><span>trading days</span></div>
-      <div><b class="num">${best ? pct(best.ret, 0) : "—"}</b><span>your best</span></div>
-    </div>`;
+    <div class="card-top"><h3>Mystery Crash</h3><b class="num">???</b></div>
+    <p class="blurb">A random crash year. Dates hidden until the end.</p>
+    <div class="qmark" aria-hidden="true">?</div>
+    ${best ? `<p class="best">Your best: <b class="num">${pct(best.ret, 0)}</b></p>` : ""}`;
   host.appendChild(m);
 }
 
@@ -691,11 +675,6 @@ function initTape() {
   tape.n = tape.i1 - tape.i0 + 1;
   tape.ys = Array.from(tape.s.close.slice(tape.i0, tape.i1 + 1));
   tape.lo = Math.min(...tape.ys) * .92; tape.hi = Math.max(...tape.ys) * 1.04;
-  // proof numbers
-  $("pDays").textContent = (S.spx.n + S.ndq.n).toLocaleString("en-US");
-  let worst = 0;
-  for (let i = 1; i < S.spx.n; i++) worst = Math.min(worst, S.spx.close[i] / S.spx.close[i - 1] - 1);
-  $("pWorst").textContent = pct(worst);
   drawTape(tape.n);
   if (!reduced) requestAnimationFrame(tapeLoop);
 }
@@ -756,11 +735,9 @@ function startGame(id) {
     lo: null, hi: null, last: 0 });
   $("gIndex").textContent = mystery ? "S&P 500 · dates hidden" : INDEX_NAME[sc.ix];
   $("gName").textContent = sc.name;
-  $("soEyebrow").textContent = mystery ? "Mystery crash" : fmtDate(s.t[i0]);
-  $("soTitle").textContent = "You have $10,000, fully invested.";
   $("soText").textContent = mystery
-    ? "Somewhere in the next 252 trading days the market falls at least 15%. No dates, no headlines. Trust your nerve."
-    : `${G.m} trading days of the ${INDEX_NAME[sc.ix]} are ahead. Real headlines appear as they happened.`;
+    ? "Somewhere in this year the market falls at least 15%. Dates are hidden. Tap Sell, Half or All in at any time."
+    : "Days will start ticking by, with real headlines. Tap Sell, Half or All in at any time.";
   $("startOverlay").hidden = false;
   $("news").classList.remove("show");
   setPosition(1, true);
@@ -784,8 +761,6 @@ function setPosition(e, silent) {
     G.marks.push({ k: G.k, e, prev: G.marks.length ? G.marks[G.marks.length - 1].e : 1 });
   }
   for (const b of document.querySelectorAll(".pos button")) b.setAttribute("aria-pressed", String(Number(b.dataset.e) === G.player.exposure));
-  const t = G.player.trades;
-  $("tradeHint").textContent = `${t} trade${t === 1 ? "" : "s"} · 0.05% per trade`;
   if (!silent) renderSide();
 }
 
@@ -842,7 +817,6 @@ function renderGame() {
   });
   const now = s.close[i0 + k], prev = s.close[i0 + Math.max(k - 1, 0)];
   $("tDate").textContent = G.mystery ? "Day " + k : fmtDate(s.t[i0 + k]);
-  $("tLvl").textContent = G.mystery ? pct(now / base - 1) + " since day 0" : fmtLevel(now);
   const ch = k ? now / prev - 1 : 0;
   $("tChg").textContent = pct(ch, 2); $("tChg").className = "chg " + sign(ch);
   const dd = 1 - now / peak;
@@ -856,17 +830,17 @@ function renderSide() {
   const k = G.k, p = G.player;
   $("yVal").textContent = money(p.value);
   const r = p.value / CR.START_CASH - 1;
-  $("yRet").textContent = pct(r) + " · max drawdown " + (p.maxDD * 100).toFixed(1) + "%";
+  $("yRet").textContent = pct(r) + (p.exposure === 1 ? " · all in the market" : p.exposure === 0 ? " · all in cash" : " · half in the market");
   $("yRet").className = "num " + sign(r);
   const racers = [
-    { who: "You", color: css("--accent"), v: p.value, meta: `${Math.round(p.exposure * 100)}% invested` },
-    { who: "Buy and hold", color: css("--hold"), v: G.hold.path[k], meta: "100% invested, never trades" },
-    { who: "The quant", color: css("--quant"), v: G.quant.book.path[k], meta: `${Math.round(G.quant.pos[k] * 100)}% invested · trend + volatility rules` },
+    { who: "You", color: css("--accent"), v: p.value },
+    { who: "The market", color: css("--hold"), v: G.hold.path[k] },
+    { who: "The quant", color: css("--quant"), v: G.quant.book.path[k] },
   ];
   const max = Math.max(...racers.map((x) => x.v), CR.START_CASH);
   const host = $("race");
   if (!host.children.length) {
-    host.innerHTML = racers.map(() => `<div class="racer"><span class="who"><span class="legend-dot"></span><span></span></span><span class="v"></span><span class="bar"><i></i></span><span class="meta"></span></div>`).join("");
+    host.innerHTML = racers.map(() => `<div class="racer"><span class="who"><span class="legend-dot"></span><span></span></span><span class="v"></span><span class="bar"><i></i></span></div>`).join("");
   }
   racers.forEach((x, i) => {
     const el = host.children[i];
@@ -876,7 +850,6 @@ function renderSide() {
     el.querySelector(".v").className = "v " + sign(x.v - CR.START_CASH);
     el.querySelector(".bar i").style.width = (x.v / max) * 100 + "%";
     el.querySelector(".bar i").style.background = x.color;
-    el.querySelector(".meta").textContent = x.meta;
   });
 }
 
@@ -899,8 +872,12 @@ function finish() {
     : p.trades === 0 ? "You held through everything." : "The market beat you this time.";
   $("rTitle").textContent = title;
   const label = G.mystery ? "Mystery Crash" : G.sc.name;
-  $("rEyebrow").textContent = label + (isBest && best ? " · New personal best" : " · Final");
-  $("rSub").textContent = `You turned $10,000 into ${money(you.final)} (${pct(you.ret)}). Buy and hold ended at ${money(hold.final)} (${pct(hold.ret)}) and the quant at ${money(quant.final)} (${pct(quant.ret)}).`;
+  $("rEyebrow").textContent = label + (isBest && best ? " · New personal best" : "");
+  $("rSub").textContent = `$10,000 became ${money(you.final)}.` + (p.trades
+    ? ` Your timing beat ${Math.round(skill.pct * 100)}% of random traders.`
+    : " You never traded. Try selling before the drop next time.");
+  $("rTiles").innerHTML = [["You", "--accent", you, true], ["The market", "--hold", hold], ["The quant", "--quant", quant]]
+    .map(([who, col, st, me]) => `<div class="tile${me ? " me" : ""}"><span><span class="legend-dot" style="background:var(${col})"></span>${who}</span><b class="${sign(st.ret)}">${pct(st.ret)}</b><small>${money(st.final)}</small></div>`).join("");
   const rv = $("rReveal");
   if (G.mystery) {
     const s = G.s;
@@ -919,10 +896,8 @@ function finish() {
   $("rTable").innerHTML = rows.map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`).join("");
 
   if (p.trades === 0) {
-    $("rSkill").textContent = "n/a";
     $("rSkillText").textContent = "You never traded, so there is no timing to test. Make a few calls next round and see if they beat chance.";
   } else {
-    $("rSkill").textContent = Math.round(skill.pct * 100) + "%";
     const pval = 1 - skill.pct;
     $("rSkillText").textContent = `You beat ${Math.round(skill.pct * 100)}% of 2,000 random traders who also made ${p.trades} trade${p.trades === 1 ? "" : "s"}. ` +
       (pval < 0.05 ? `That's p ≈ ${pval.toFixed(3)}: your timing looks like real skill.` : pval < 0.25 ? "Better than most, though luck could still explain it." : "Random timing did about as well. Markets are hard.");
@@ -931,6 +906,7 @@ function finish() {
   const tag = G.mystery ? "a mystery crash" : "the " + G.sc.name;
   $("brag").value = `I played ${tag} on Crash Replay with real market data: $10,000 → ${money(you.final)} (${pct(you.ret)}). Buy and hold: ${pct(hold.ret)}.` +
     (p.trades ? ` I beat ${Math.round(skill.pct * 100)}% of random traders.` : "") + ` Can you beat me?` + (SHARE_URL ? " " + SHARE_URL : "");
+  $("rDetails").open = false;
   show("results");
   requestAnimationFrame(drawResults);
 }
@@ -949,7 +925,7 @@ function drawResults() {
     ],
     markers: G.marks.map((mk) => ({ k: mk.k, y: yP[mk.k], dir: mk.e > mk.prev ? 1 : -1, color: mk.e > mk.prev ? css("--up") : css("--down") })),
   });
-  drawHist();
+  if ($("rDetails").open) drawHist();
 }
 
 function drawHist() {
@@ -1057,7 +1033,7 @@ document.addEventListener("click", (e) => {
 });
 $("beginBtn").onclick = () => { setPlaying(true); $("beginBtn").blur(); };
 $("playBtn").onclick = () => { if (G.k < G.m) setPlaying(!G.playing); };
-$("stepBtn").onclick = () => { setPlaying(false); $("startOverlay").hidden = true; advance(); renderGame(); };
+function stepDay() { setPlaying(false); $("startOverlay").hidden = true; advance(); renderGame(); }
 $("quitBtn").onclick = () => { setPlaying(false); renderCards(); show("home"); };
 $("homeBtn").onclick = () => { if (G.playing) setPlaying(false); renderCards(); show("home"); };
 $("againBtn").onclick = () => startGame(G.sc.id);
@@ -1068,6 +1044,7 @@ $("copyBtn").onclick = async () => {
   catch (e) { $("brag").select(); toast("Selected. Press Ctrl+C or ⌘C to copy."); }
 };
 $("cardBtn").onclick = () => saveCard();
+$("rDetails").addEventListener("toggle", () => { if ($("rDetails").open) requestAnimationFrame(drawHist); });
 
 document.addEventListener("keyup", (e) => {
   if (!$("game").hidden && e.key === " " && e.target.closest && e.target.closest("button")) e.preventDefault();
@@ -1077,7 +1054,7 @@ document.addEventListener("keydown", (e) => {
   const map = { "1": 0, "2": 0.5, "3": 1 };
   if (e.key in map) { setPosition(map[e.key]); renderGame(); e.preventDefault(); }
   else if (e.key === " ") { if (G.k < G.m) setPlaying(!G.playing); e.preventDefault(); }
-  else if (e.key === "ArrowRight") { $("stepBtn").click(); e.preventDefault(); }
+  else if (e.key === "ArrowRight") { stepDay(); e.preventDefault(); }
   else if (e.key === "Escape") $("quitBtn").click();
 });
 
