@@ -1,9 +1,9 @@
-name: yield-curve-lab data
+name: crash-replay data
 
 on:
   push:
     branches: [claude/project-thread-o526s5]
-    paths: [yield-curve-lab/scripts/fetch_data.py, .github/workflows/ycl-data.yml]
+    paths: [crash-replay/scripts/fetch_data.py, .github/workflows/crash-replay-data.yml]
   workflow_dispatch:
 
 permissions:
@@ -17,11 +17,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python yield-curve-lab/scripts/fetch_data.py
+      - run: python crash-replay/scripts/fetch_data.py
       - name: Commit data
         run: |
           git config user.name "Parveen Kumar Naresh Kumar"
           git config user.email "220802990+parveen06naresh@users.noreply.github.com"
-          git add yield-curve-lab/data/raw
-          git commit -m "Yield Curve Lab: refresh FRED data" || echo "no changes"
+          git add crash-replay/data/raw
+          git commit -m "Crash Replay: refresh market data" || echo "no changes"
           git push
