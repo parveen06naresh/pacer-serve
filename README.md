@@ -228,11 +228,35 @@ code runs unmodified with `--device cuda`.
 * `pacer/scheduler.py`: prefill-first, chunked (Sarathi), chunked+EDF, and Pacer.
 * `pacer/costmodel.py`: roofline, linear, GBDT, hybrid models; offline and online conformal.
 * `pacer/workload.py`: synthetic Poisson/Gamma traffic and Azure production-trace replay.
+* `pacer/csrc/core.cpp`: **Pacer Core**, the scheduler hot path in C++17 behind pybind11:
+  KV block allocator, allocation-free budget search over the linear latency model,
+  Moore-Hodgson ordering, and the adaptive conformal controller (ring buffer +
+  `nth_element`). Built automatically by `pip install -e .`; falls back to Python if no
+  compiler. `tests/test_core.py` checks it makes the same decisions as the Python reference.
 * `pacer/cli.py`: `pacer demo | bench | profile | figures | test`.
 * `docs/paper/`: a 5-page write-up with the step-level guarantee (Proposition 1) and its proof.
 * `tests/`: the paged, chunked, mixed-batch engine reproduces a naive full-recompute
   forward pass token-for-token; scheduler invariants; online conformal coverage through a
   step change in hardware speed.
+
+### Pacer Core: scheduler overhead (CPU, `python scripts/bench_core.py`)
+
+Median time for one `Pacer.schedule` call, identical decisions in every row
+(4-vCPU Xeon @ 2.1 GHz, Python 3.13; `results/core_bench.json`):
+
+| running + waiting requests | v0.2.0 (Python) | now, Python path | now, C++ core | vs v0.2.0 |
+|---|---|---|---|---|
+| 16 + 8 | 178 µs | 157 µs | 84 µs | 2.1x |
+| 64 + 32 | 425 µs | 320 µs | 205 µs | 2.1x |
+| 256 + 128 | 3.29 ms | 0.85 ms | 0.72 ms | 4.6x |
+| 1,024 + 256 | 25.6 ms | 2.9 ms | 3.0 ms | 8.6x |
+
+Online conformal update + bound: 50.6 µs in Python, 2.7 µs in C++ (19x). Honest reading:
+at large batches most of the win came from removing an O(n^2) membership scan (field-by-field
+dataclass equality inside `r in running`); the C++ budget search and controller remove the
+rest of the per-probe allocation, and matter most at small and medium batches, where a
+GPU decode step is only a few milliseconds. The remaining cost is Python bookkeeping per
+request, which is the next thing to move.
 
 ## Try it
 

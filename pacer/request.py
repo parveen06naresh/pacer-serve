@@ -4,7 +4,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 
 
-@dataclass
+@dataclass(eq=False)  # identity equality: `r in running` must not compare every field
 class Request:
     rid: int
     arrival: float
