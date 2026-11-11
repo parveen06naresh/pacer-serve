@@ -83,7 +83,7 @@ class ChunkedFixed(Scheduler):
 class Pacer(Scheduler):
     def __init__(self, latency_model, slo: SLO, margin: float | None = None, coverage: float = 0.9,
                  max_batched_tokens: int = 2048, use_slack: bool = False, use_edf: bool = True,
-                 online=None, order: str = "mh", name: str | None = None):
+                 online=None, order: str = "mh", name: str | None = None, use_core: bool = True):
         self.lat = latency_model
         self.slo = slo
         # Risk dial: by default the margin comes from the model's conformal bound, so a
@@ -99,6 +99,12 @@ class Pacer(Scheduler):
         self.order = order  # "edf" or "mh" (Moore-Hodgson: fewest TTFT misses)
         self.name = name or "pacer (ours)"
         self.last_target = 0.0
+        # C++ fast path for the budget search when the latency model is linear.
+        from .core import HAVE_CORE, _core
+        coef = getattr(latency_model, "coef", None)
+        self._planner = (_core.BudgetPlanner([float(x) for x in coef])
+                         if use_core and HAVE_CORE and type(latency_model).__name__ == "LinearModel" and coef is not None
+                         else None)
 
     def _margin(self) -> float:
         if self.online is not None and self.online.ready:
@@ -158,6 +164,11 @@ class Pacer(Scheduler):
                 return scale * (c[1] * n + c[2] * n * L + c[5])
             return scale * self.lat.predict(StepShape(((n, L),), ()))
 
+        if self._planner is not None and c is not None:  # C++ path, same order
+            from .core import _core
+            idx = _core.moore_hodgson([r.arrival for r in cands], [cost(r) for r in cands], [r.rid for r in cands],
+                                      now, self.slo.ttft)
+            return [cands[i] for i in idx]
         on_time, late, heap, t = [], [], [], 0.0
         for r in sorted(cands, key=lambda r: r.arrival):
             p = cost(r)
@@ -190,8 +201,9 @@ class Pacer(Scheduler):
         # Only requests we can actually hold in KV memory are candidates this step.
         free = len(bm.free)
         fits = []
+        is_running = set(map(id, running))  # O(1) membership; a list scan made this step O(n^2)
         for r in order:
-            if r in running:
+            if id(r) in is_running:
                 fits.append(r)
             elif bm.blocks_needed(r) <= free:
                 free -= bm.blocks_needed(r)
@@ -203,7 +215,10 @@ class Pacer(Scheduler):
 
         target = self._latency_target(now, decodes)
         hi = min(self.max_tokens - len(decodes), sum(r.remaining_prefill for r in fits))
-        if target == float("inf"):
+        if self._planner is not None:
+            c = self._planner.plan([r.remaining_prefill for r in fits], [r.num_prefilled for r in fits],
+                                   list(dec_shape), target, hi)
+        elif target == float("inf"):
             c = hi
         else:
             # Largest prefill budget whose predicted step latency fits the target.

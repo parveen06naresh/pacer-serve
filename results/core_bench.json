@@ -1,0 +1,47 @@
+{
+  "machine": "x86_64",
+  "python": "3.13.18",
+  "schedule_step": [
+    {
+      "running": 16,
+      "waiting": 8,
+      "python_us": 157.3,
+      "cpp_us": 83.6,
+      "speedup": 1.9,
+      "v020_us": 178.2,
+      "speedup_vs_v020": 2.1
+    },
+    {
+      "running": 64,
+      "waiting": 32,
+      "python_us": 319.9,
+      "cpp_us": 205.2,
+      "speedup": 1.6,
+      "v020_us": 424.8,
+      "speedup_vs_v020": 2.1
+    },
+    {
+      "running": 256,
+      "waiting": 128,
+      "python_us": 849.2,
+      "cpp_us": 716.3,
+      "speedup": 1.2,
+      "v020_us": 3289.6,
+      "speedup_vs_v020": 4.6
+    },
+    {
+      "running": 1024,
+      "waiting": 256,
+      "python_us": 2895.9,
+      "cpp_us": 2967.1,
+      "speedup": 1.0,
+      "v020_us": 25616.3,
+      "speedup_vs_v020": 8.6
+    }
+  ],
+  "online_conformal": {
+    "python_us": 50.61,
+    "cpp_us": 2.7,
+    "speedup": 18.7
+  }
+}
