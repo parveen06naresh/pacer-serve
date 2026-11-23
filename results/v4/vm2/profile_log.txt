@@ -1,0 +1,41 @@
+roofline: 305 GFLOP/s, 36.8 GB/s
+  profiled 50/600 shapes
+  profiled 100/600 shapes
+  profiled 150/600 shapes
+  profiled 200/600 shapes
+  profiled 250/600 shapes
+  profiled 300/600 shapes
+  profiled 350/600 shapes
+  profiled 400/600 shapes
+  profiled 450/600 shapes
+  profiled 500/600 shapes
+  profiled 550/600 shapes
+  profiled 600/600 shapes
+
+[random 80/20] train=480 test=120
+  roofline  MAPE= 57.5%  p50= 65.4%  p90= 79.4%
+  linear    MAPE=  7.7%  p50=  5.7%  p90= 16.3%
+  gbdt      MAPE= 10.1%  p50=  8.2%  p90= 21.3%
+  hybrid    MAPE=  8.4%  p50=  7.1%  p90= 16.6%
+
+[extrapolate (train <=512 tok, test >512)] train=524 test=76
+  roofline  MAPE= 82.4%  p50= 89.0%  p90=127.0%
+  linear    MAPE=  9.4%  p50=  8.3%  p90= 16.5%
+  gbdt      MAPE= 44.8%  p50= 49.9%  p90= 68.8%
+  hybrid    MAPE=  7.0%  p50=  6.3%  p90= 13.6%
+
+conformal latency bounds (linear model):
+  target   50%  ratio bound 1.005  empirical test coverage  44.2%
+  target   80%  ratio bound 1.105  empirical test coverage  78.3%
+  target   90%  ratio bound 1.182  empirical test coverage  89.2%
+  target   95%  ratio bound 1.214  empirical test coverage  95.8%
+  target   99%  ratio bound 1.354  empirical test coverage  99.2%
+
+linear model (all data):
+  bias          1.471e-02
+  tokens        4.568e-04
+  prefill_attn  1.845e-07
+  decode_kv     1.059e-06
+  decode_pad    2.984e-06
+  prefill_seqs  6.821e-03
+  decode_seqs   5.445e-04
