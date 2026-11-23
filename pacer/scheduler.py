@@ -31,6 +31,37 @@ def _admit_next(waiting: list[Request], running: list[Request], bm: BlockManager
     return True
 
 
+def _runnable_decodes(waiting: list[Request], running: list[Request], bm: BlockManager) -> list[Request]:
+    """Decodes that can run this step.
+
+    With the default allocator every request holds its full KV footprint, so all
+    decodes can run. With a `GrowingBlockManager` (KV reserved from a *predicted*
+    output length), a decode that outgrows its reservation needs a new block; if none
+    is free it is preempted (vLLM's recompute preemption) and re-queued, and preempted
+    requests are re-admitted oldest first as memory frees up.
+    """
+    decodes = [r for r in running if not r.in_prefill]
+    ensure = getattr(bm, "ensure", None)
+    if ensure is None:
+        return decodes
+    ok = []
+    for r in sorted(decodes, key=lambda r: r.arrival):
+        if ensure(r):
+            ok.append(r)
+        else:
+            bm.preempt(r)
+            running.remove(r)
+            waiting.insert(0, r)
+    for r in [w for w in waiting if not w.in_prefill]:  # preempted, waiting to resume
+        if not bm.can_admit(r):
+            break
+        bm.admit(r)
+        waiting.remove(r)
+        running.append(r)
+        ok.append(r)
+    return ok
+
+
 class Scheduler:
     name = "base"
 
@@ -64,9 +95,9 @@ class ChunkedFixed(Scheduler):
         self.name = f"chunked-{token_budget}" + ("+EDF" if edf else " (Sarathi)")
 
     def schedule(self, now, waiting, running, bm):
-        batch: Batch = [(r, 1) for r in running if not r.in_prefill]
+        batch: Batch = [(r, 1) for r in _runnable_decodes(waiting, running, bm)]
         left = max(self.budget - len(batch), 0)
-        cands = [r for r in running if r.in_prefill] + list(waiting)
+        cands = [r for r in running if r.in_prefill] + [r for r in waiting if r.in_prefill]
         if self.edf is not None:
             cands = self.edf._prefill_order(now, cands)
         for r in cands:
@@ -183,9 +214,9 @@ class Pacer(Scheduler):
         return out
 
     def schedule(self, now, waiting, running, bm):
-        decodes = [r for r in running if not r.in_prefill]
+        decodes = _runnable_decodes(waiting, running, bm)
         dec_shape = tuple(r.context_len + 1 for r in decodes)
-        order = self._prefill_order(now, [r for r in running if r.in_prefill] + list(waiting))
+        order = self._prefill_order(now, [r for r in running if r.in_prefill] + [r for r in waiting if r.in_prefill])
 
         # Only requests we can actually hold in KV memory are candidates this step.
         free = len(bm.free)

@@ -6,7 +6,7 @@ a distribution-free risk bound that re-calibrates itself online, and orders prom
 an exact algorithm for minimising missed deadlines.**
 
 [![CI](https://github.com/parveen06naresh/pacer-serve/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
-[Paper (PDF, 5 pages)](docs/paper/pacer.pdf) ·
+[Paper (PDF)](docs/paper/pacer.pdf) ·
 [GPU notebook (Colab, free T4)](notebooks/gpu_benchmark.ipynb) ·
 [Design notes](docs/DESIGN.md)
 
@@ -23,6 +23,30 @@ Headline results (all reproducible from this repo):
   Every fixed-budget configuration falls to **70% or worse** somewhere.
 * **More capacity than vLLM/Sarathi-style scheduling** on the real engine: 7.0 req/s at
   90% SLO attainment vs 4.71 for the best fixed chunk budget (+49%).
+
+**New in v0.3: the stale-predictor result** ([paper](docs/paper/pacer.pdf), section 5).
+Refreshing a model online is not the same as controlling risk. In simulation under a 1.5x
+slowdown at 5 req/s, the in-flight SLO attainment of the same scheduler was:
+
+| Calibration of the step-latency model | In-drift SLO attainment | Steps over the bound |
+|---|---|---|
+| Offline (profiled once) | 33.1% | not tracked |
+| Online point estimate (median ratio, the approach of recent predictive schedulers) | 35.4% | 47-50% |
+| Online point estimate with a 0.9 safety factor | 41.2% | 13-22% |
+| Fixed 128-token budget with deadline ordering, no model | 47.1% | n/a |
+| **Online conformal (adaptive conformal inference, alpha = 0.1)** | **85.0%** | **9.6-10.0%** |
+
+The real engine agrees (re-profiled on a second VM, noisy neighbour, 2 seeds, 2 req/s): offline
+30.6%, fixed budget 47.4%, online point 63.1%, **online conformal 85.5%** of in-flight requests in
+SLO, with 9.9-10.3% of steps over the bound (`results/v4/vm2/`).
+
+The same wrapper also controls a second predictor, the output length used to reserve KV memory:
+under a 2.5x shift in output lengths it keeps the share of requests that outgrow their
+reservation at 7-9% (target 10%), versus 22-30% for offline calibration, and cuts preemptions
+by an order of magnitude (`scripts/bench_kv.py`, `pacer/kvpredict.py`). Its SLO benefit is
+mixed in this engine; see the paper.
+
+![Stale predictors under drift](docs/figures/stale_predictors.png)
 
 ![When the hardware slows down](docs/figures/drift.png)
 
@@ -229,7 +253,8 @@ code runs unmodified with `--device cuda`.
 * `pacer/costmodel.py`: roofline, linear, GBDT, hybrid models; offline and online conformal.
 * `pacer/workload.py`: synthetic Poisson/Gamma traffic and Azure production-trace replay.
 * `pacer/cli.py`: `pacer demo | bench | profile | figures | test`.
-* `docs/paper/`: a 5-page write-up with the step-level guarantee (Proposition 1) and its proof.
+* `docs/paper/`: the paper (stale predictors, step-level guarantee with proof); `docs/ARXIV.md`: how to post it.
+* `pacer/kvpredict.py`: output-length predictors for KV reservation (offline, online point, online conformal).
 * `tests/`: the paged, chunked, mixed-batch engine reproduces a naive full-recompute
   forward pass token-for-token; scheduler invariants; online conformal coverage through a
   step change in hardware speed.
@@ -238,7 +263,7 @@ code runs unmodified with `--device cuda`.
 
 ```bash
 pip install -e .[dev]
-pacer test                    # 12 tests, including token-exact paged vs dense
+pacer test                    # 18 tests, including token-exact paged vs dense
 pacer demo                    # serve 8 Shakespeare prompts with a trained model, Pacer scheduling
 ```
 
@@ -272,7 +297,9 @@ The Azure traces in `data/` are from [Azure/AzurePublicDataset](https://github.c
 * Azure traces are replayed with time compressed and lengths scaled by 0.2 to fit a CPU;
   the arrival pattern and the shape of the length distribution are preserved.
 * Random weights (latency does not depend on weight values; correctness is tested).
-* No preemption or swapping: requests reserve their full KV footprint at admission.
+* The default allocator reserves each request's full KV footprint at admission; the
+  growing allocator with recompute preemption (`GrowingBlockManager`) is used for the KV
+  reservation experiment only.
 * Pacer raises goodput partly by letting already-hopeless requests wait, so their TTFT
   is worse than under FCFS. That is right for goodput, and wrong if every request must
   eventually be fast.

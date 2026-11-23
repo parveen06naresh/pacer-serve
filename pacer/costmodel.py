@@ -113,6 +113,24 @@ class OnlineConformal:
         self.buf.append(ratio)
 
 
+class OnlinePoint(OnlineConformal):
+    """Online point calibration without a risk margin: the bound is the median recent
+    actual/predicted ratio, optionally divided by a fixed safety factor.
+
+    This is the "keep the model fresh" baseline (in the spirit of SynergySched,
+    arXiv:2509.23384, which refits its step-latency model online): it tracks drift but
+    offers no coverage guarantee, so roughly half of all steps overshoot a point
+    forecast and the safety factor is a hand-set constant again.
+    """
+
+    def __init__(self, safety: float = 1.0, window: int = 256, warmup: int = 32):
+        super().__init__(alpha=0.5, gamma=0.0, window=window, warmup=warmup)
+        self.safety = safety
+
+    def bound(self) -> float:
+        return self.center() / self.safety
+
+
 class LatencyModel:
     name = "base"
 

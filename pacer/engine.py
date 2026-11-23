@@ -70,6 +70,63 @@ class BlockManager:
         return 1.0 - len(self.free) / self.num_blocks
 
 
+class GrowingBlockManager(BlockManager):
+    """Paged KV allocator that reserves a *predicted* output length at admission and
+    grows on demand (the vLLM allocation model).
+
+    `reserve(r)` returns how many output tokens to reserve for request r. Reserve too
+    little and requests outgrow their blocks, forcing preemptions (recompute); reserve
+    too much and fewer requests fit, so queues grow. A preempted request's KV must be
+    recomputed when it resumes; that cost is charged to the next step through
+    `take_pending()` using `recompute_cost(r)` (the latency model's prefill time for
+    its context), so no extra constants enter the simulation.
+    """
+
+    def __init__(self, num_blocks: int, block_size: int, reserve, recompute_cost=None, on_finish=None):
+        super().__init__(num_blocks, block_size)
+        self.reserve = reserve
+        self.recompute_cost = recompute_cost
+        self.on_finish = on_finish
+        self.preemptions = 0
+        self.exceeded: set[int] = set()   # requests that outgrew their first reservation
+        self.reserved: dict[int, int] = {}
+        self.pending = 0.0
+
+    def blocks_needed(self, r: Request) -> int:
+        gen = len(r.output_ids)
+        if r.rid not in self.reserved:
+            self.reserved[r.rid] = max(int(self.reserve(r)), 1)
+        left = max(self.reserved[r.rid] - gen, 1)
+        return -(-(r.prompt_len + gen + left) // self.block_size)
+
+    def admit(self, r: Request) -> None:
+        if r.output_ids and self.recompute_cost is not None:  # resuming after preemption
+            self.pending += self.recompute_cost(r)
+        super().admit(r)
+
+    def ensure(self, r: Request) -> bool:
+        need = -(-(r.context_len + 1) // self.block_size)
+        while len(r.blocks) < need:
+            if not self.free:
+                return False
+            r.blocks.append(self.free.pop())
+            self.exceeded.add(r.rid)
+        return True
+
+    def preempt(self, r: Request) -> None:
+        self.preemptions += 1
+        super().release(r)
+
+    def release(self, r: Request) -> None:
+        if r.done and self.on_finish is not None:
+            self.on_finish(r)
+        super().release(r)
+
+    def take_pending(self) -> float:
+        p, self.pending = self.pending, 0.0
+        return p
+
+
 def _apply_progress(batch: list[tuple[Request, int]], new_tokens: list[int | None], t_end: float) -> None:
     for (r, n), tok in zip(batch, new_tokens):
         if r.in_prefill:
@@ -168,5 +225,8 @@ class SimExecutor:
             dt *= float(self.rng.lognormal(0.0, self.noise))
         if self.slowdown is not None:
             dt *= self.slowdown(now)
+        take = getattr(self.blocks, "take_pending", None)
+        if take is not None:
+            dt += take()
         _apply_progress(batch, [None] * len(batch), now + dt)
         return dt

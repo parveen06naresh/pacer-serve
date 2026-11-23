@@ -5,8 +5,9 @@
 1. Profiles the ~0.5B `small` model in FP16 on the GPU and fits + calibrates the latency model.
 2. Derives SLOs from the measured hardware (TPOT = 3x a 32-request decode step).
 3. Uses the simulator to find the load where the best fixed budget starts failing.
-4. Runs the real engine around that load: steady state, then with a GPU co-tenant
+4. Runs the real engine around that load (2 seeds): steady state, then with a GPU co-tenant
    (a second process issuing matmul bursts on the same GPU) for the drift result.
+   Policies include the online point-calibration baseline (no conformal margin).
 """
 from __future__ import annotations
 
@@ -77,11 +78,12 @@ def main():
     rates = [round(knee * f, 2) for f in ((1.1,) if args.quick else (0.9, 1.1, 1.3, 1.5))]
     print(f"best fixed budget starts failing near {knee} req/s; real runs at {rates}", flush=True)
 
-    pols = ["chunked-128", "chunked-edf-128", "pacer", "pacer-online"]
+    pols = ["chunked-128", "chunked-edf-128", "pacer", "pacer-online", "pacer-online-point"]
+    seeds = ["--seeds", "0"] if args.quick else ["--seeds", "0", "1"]
     run(["scripts/bench.py", "--mode", "real", "--rates", *map(str, rates), "--policies", *pols,
-         "--out", str(out / "bench_real.jsonl"), *common])
+         "--out", str(out / "bench_real.jsonl"), *seeds, *common])
     run(["scripts/bench.py", "--mode", "real", "--rates", str(rates[min(1, len(rates) - 1)]), "--hog", "0.3", "0.7", "0.5",
-         "--policies", *pols, "--out", str(out / "bench_real_hog.jsonl"), *common])
+         "--policies", *pols, "--out", str(out / "bench_real_hog.jsonl"), *seeds, *common])
     run(["scripts/summarize.py", str(out / "bench_real.jsonl"), str(out / "bench_real_hog.jsonl")])
     print(f"done: results in {out}", flush=True)
 

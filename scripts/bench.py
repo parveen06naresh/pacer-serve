@@ -13,7 +13,7 @@ from pathlib import Path
 
 import torch
 
-from pacer.costmodel import LinearModel, OnlineConformal
+from pacer.costmodel import LinearModel, OnlineConformal, OnlinePoint
 from pacer.engine import BlockManager, RealExecutor, SimExecutor
 from pacer.metrics import summarize
 from pacer.model import build_model
@@ -38,6 +38,8 @@ def policies(lat, slo, which: list[str]):
         "chunked-edf-512": lambda: ChunkedFixed(512, edf=Pacer(lat, slo)),
         "pacer": lambda: Pacer(lat, slo),
         "pacer-online": lambda: Pacer(lat, slo, online=OnlineConformal(alpha=0.1), name="pacer + online conformal"),
+        "pacer-online-point": lambda: Pacer(lat, slo, online=OnlinePoint(), name="pacer + online point (no margin)"),
+        "pacer-online-point90": lambda: Pacer(lat, slo, online=OnlinePoint(safety=0.9), name="pacer + online point x0.9"),
         "pacer-slack": lambda: Pacer(lat, slo, use_slack=True, name="pacer + slack banking"),
         "pacer-edf": lambda: Pacer(lat, slo, order="edf", name="pacer, EDF instead of Moore-Hodgson"),
         "pacer-fcfs": lambda: Pacer(lat, slo, use_edf=False, name="pacer, FCFS order"),
